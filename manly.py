@@ -23,14 +23,7 @@ def _get_options_section(manpage):
         return f(FLAG_SECTION_PATTERN % 'DESCRIPTION').group(0)
 
 
-def main():
-    command = sys.argv[1]
-    flags = sys.argv[2:]
-
-    manpage = subprocess.check_output(['man', command]).decode('utf-8')
-    option_section = _get_options_section(manpage)
-
-    headline = re.search(HEADLINE_PATTERN, manpage, re.MULTILINE).group(0)
+def _get_flag_reprs(flags, option_section):
     flag_reprs = []
     for flag in flags:
         description = []
@@ -46,6 +39,17 @@ def main():
             description.append(' '*8 + line.strip())
 
         flag_reprs.append(flag_headline.strip() + '\n' + '\n'.join(description))
+    return flag_reprs
+
+
+def main():
+    command = sys.argv[1]
+    flags = sys.argv[2:]
+
+    manpage = subprocess.check_output(['man', command]).decode('utf-8')
+    headline = re.search(HEADLINE_PATTERN, manpage, re.MULTILINE).group(0)
+    option_section = _get_options_section(manpage)
+    flag_reprs = _get_flag_reprs(flags, option_section)
 
     print(headline)
     print('-' * len(headline))
