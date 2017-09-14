@@ -17,11 +17,17 @@ def _count_spaces(s):
 
 
 def _get_options_section(manpage):
-    f = lambda s: re.search(s, manpage, re.MULTILINE)
+    """Return the part of *manpage* with flag descriptions."""
     try:
-        return f(FLAG_SECTION_PATTERN % 'OPTIONS').group(0)
+        return re.search(FLAG_SECTION_PATTERN % 'OPTIONS',
+                manpage,
+                re.MULTILINE,
+        ).group(0)
     except AttributeError:
-        return f(FLAG_SECTION_PATTERN % 'DESCRIPTION').group(0)
+        return re.search(FLAG_SECTION_PATTERN % 'DESCRIPTION',
+                manpage,
+                re.MULTILINE,
+        ).group(0)
 
 
 def _format_flag_repr(headline, description):
