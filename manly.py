@@ -3,9 +3,9 @@ import subprocess
 import re
 
 
-OPTION_SECTION_PATTERN = r'^OPTIONS\n(^\s+.+\n+)+'
 HEADLINE_PATTERN = r'(?<=^NAME\n\s{7}).+'
 FLAG_HEADLINE_PATTERN = r'^\s+%s.+.+'
+FLAG_SECTION_PATTERN = r'^%s\n(^\s+.+\n+)+'
 
 
 def _count_spaces(s):
@@ -15,13 +15,20 @@ def _count_spaces(s):
     return 0
 
 
+def _get_options_section(manpage):
+    f = lambda s: re.search(s, manpage, re.MULTILINE)
+    try:
+        return f(FLAG_SECTION_PATTERN % 'OPTIONS').group(0)
+    except AttributeError:
+        return f(FLAG_SECTION_PATTERN % 'DESCRIPTION').group(0)
+
+
 def main():
     command = sys.argv[1]
     flags = sys.argv[2:]
 
     manpage = subprocess.check_output(['man', command]).decode('utf-8')
-    option_section = re.search(OPTION_SECTION_PATTERN,
-                               manpage, re.MULTILINE).group(0)
+    option_section = _get_options_section(manpage)
 
     headline = re.search(HEADLINE_PATTERN, manpage, re.MULTILINE).group(0)
     flag_reprs = []
