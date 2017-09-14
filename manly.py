@@ -23,6 +23,17 @@ def _get_options_section(manpage):
         return f(FLAG_SECTION_PATTERN % 'DESCRIPTION').group(0)
 
 
+def _format_flag_repr(headline, description):
+    description[0] = description[0].capitalize()
+    if description[-1][-1] != '.':
+        description[-1] += '.'
+    indented = [' '*8 + line for line in description]
+    return '%s\n%s' % (
+            headline.strip(),
+            '\n'.join(indented),
+    )
+
+
 def _get_flag_reprs(flags, option_section):
     flag_reprs = []
     for flag in flags:
@@ -36,9 +47,9 @@ def _get_flag_reprs(flags, option_section):
                 continue
             if _count_spaces(line) == indentation:
                 break
-            description.append(' '*8 + line.strip())
+            description.append(line.strip())
 
-        flag_reprs.append(flag_headline.strip() + '\n' + '\n'.join(description))
+        flag_reprs.append(_format_flag_repr(flag_headline, description))
     return flag_reprs
 
 
