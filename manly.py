@@ -60,9 +60,21 @@ def _get_flag_reprs(flags, option_section):
     return flag_reprs
 
 
+def _parse_flags(raw_flags):
+    """Return a list of the flags in *raw_flags*."""
+    flags = []
+    for raw_flag in raw_flags:
+        if raw_flag.startswith('--'):
+            flags.append(raw_flag[:raw_flag.find('=')])
+        elif raw_flag.startswith('-'):
+            for flag in raw_flag[1:]:
+                flags.append('-' + flag)
+    return flags
+
+
 def main():
     command = sys.argv[1]
-    flags = sys.argv[2:]
+    flags = _parse_flags(sys.argv[2:])
 
     manpage = subprocess.check_output(['man', command]).decode('utf-8')
     headline = re.search(HEADLINE_PATTERN, manpage, re.MULTILINE).group(0)
