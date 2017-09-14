@@ -9,9 +9,10 @@ FLAG_SECTION_PATTERN = r'^%s\n(^\s+.+\n+)+'
 
 
 def _count_spaces(s):
-    for i, char in enumerate(s):
+    """Return the amount of spaces at the start of *s*."""
+    for count, char in enumerate(s):
         if char != ' ':
-            return i
+            return count
     return 0
 
 
