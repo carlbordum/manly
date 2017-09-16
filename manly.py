@@ -40,16 +40,16 @@ def parse_manpage(page, args):
         output (list): The blocks of the manpage that match the given flags.
     '''
     sections = []
-    temp_sections = []
+    current_section = []
     output = []
 
-    for line in page.split('\n'):
+    for line in page.splitlines():
         line = line + '\n'
         if line != '\n':
-            temp_sections.append(line)
+            current_section.append(line)
         else:
-            sections.append(''.join(temp_sections))
-            temp_sections = []
+            sections.append(''.join(current_section))
+            current_section = []
 
     for section in sections:
         section_top = section.strip().split('\n')[:2]
@@ -68,11 +68,10 @@ def parse_manpage(page, args):
 
 def main():
     command = sys.argv[1]
-    flags = flag_parser(sys.argv[2:])
+    flags = parse_flags(sys.argv[2:])
     manpage = subprocess.check_output(['man', command]).decode('utf-8')
 
     title = re.search(r'(?<=^NAME\n\s{7}).+', manpage, re.MULTILINE).group(0)
-
     output = parse_manpage(manpage, flags)
 
     print('\nSearching for:', command, *flags, '\n')
