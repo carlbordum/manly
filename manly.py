@@ -69,13 +69,17 @@ def main():
     command = sys.argv[1]
     flags = parse_flags(sys.argv[2:])
     manpage = subprocess.check_output(['man', command]).decode('utf-8')
+
+    title = re.search(r'(?<=^NAME\n\s{7}).+', manpage, re.MULTILINE).group(0)
     parsed_manpage = parse_manpage(manpage)
 
+    print(title)
+    print('-' * len(title))
     for flag in flags:
         for headline, description in parsed_manpage:
             if flag in headline:
                 print(format_headline(headline))
-                print(format_description(description, width), end='\n\n')
+                print(format_description(description), end='\n\n')
 
 
 if __name__ == '__main__':
