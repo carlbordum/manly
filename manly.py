@@ -56,10 +56,6 @@ def parse_flags(raw_flags):
     return flags
 
 
-def format_headline(headline):
-    return headline
-
-
 def format_description(description):
     description[0] = ' '*7 + description[0]
     return ('\n'+' '*7).join(description)
@@ -78,7 +74,7 @@ def main():
     for flag in flags:
         for headline, description in parsed_manpage:
             if flag in headline:
-                print(format_headline(headline))
+                print(headline)
                 print(format_description(description), end='\n\n')
 
 
