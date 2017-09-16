@@ -16,18 +16,37 @@ def _count_spaces(s):
     return 0
 
 
-def _get_options_section(manpage):
-    """Return the part of *manpage* with flag descriptions."""
-    try:
-        return re.search(FLAG_SECTION_PATTERN % 'OPTIONS',
-                manpage,
-                re.MULTILINE,
-        ).group(0)
-    except AttributeError:
-        return re.search(FLAG_SECTION_PATTERN % 'DESCRIPTION',
-                manpage,
-                re.MULTILINE,
-        ).group(0)
+def get_headlines(manpage_lines):
+    """Return a list with (headline, index) for all flags."""
+    headlines = []
+    for i, headline in enumerate(manpage_lines):
+        if re.match(r'\s+--?\w', headline):
+            headlines.append((headline, i))
+    return headlines
+
+
+def get_flags(manpage):
+    """Return (headline, description) for all flags in *manpage*."""
+    lines = manpage.splitlines()
+    flags = []
+    for headline, index in get_headlines(lines):
+        description = []
+        indentation = _count_spaces(headline)
+        i = index+1
+        next_line = lines[i]
+        next_indentation = _count_spaces(next_line)
+        if next_indentation == 0:
+            i += 1
+            next_line = lines[i]
+            next_indentation = _count_spaces(next_line)
+        if next_indentation <= indentation:
+            continue
+        while _count_spaces(next_line) == next_indentation:
+            description.append(next_line.strip())
+            i += 1
+            next_line = lines[i]
+        flags.append((headline.strip(), description))
+    return flags
 
 
 def _format_flag_repr(headline, description):
