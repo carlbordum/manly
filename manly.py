@@ -61,13 +61,13 @@ def format_headline(headline):
 
 
 def format_description(description):
-    return description
+    description[0] = ' '*7 + description[0]
+    return ('\n'+' '*7).join(description)
 
 
 def main():
     command = sys.argv[1]
     flags = parse_flags(sys.argv[2:])
-
     manpage = subprocess.check_output(['man', command]).decode('utf-8')
     parsed_manpage = parse_manpage(manpage)
 
@@ -75,7 +75,7 @@ def main():
         for headline, description in parsed_manpage:
             if flag in headline:
                 print(format_headline(headline))
-                print(format_description(description))
+                print(format_description(description, width), end='\n\n')
 
 
 if __name__ == '__main__':
