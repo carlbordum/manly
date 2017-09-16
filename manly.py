@@ -20,7 +20,7 @@ def get_headlines(manpage_lines):
     return headlines
 
 
-def get_flags(manpage):
+def parse_manpage(manpage):
     """Return (headline, description) for all flags in *manpage*."""
     lines = manpage.splitlines()
     flags = []
@@ -69,11 +69,13 @@ def main():
     flags = parse_flags(sys.argv[2:])
 
     manpage = subprocess.check_output(['man', command]).decode('utf-8')
-    flags = get_flags(manpage)
+    parsed_manpage = parse_manpage(manpage)
 
-    for headline, description in flags:
-        print(format_headline(headline))
-        print(format_description(description))
+    for flag in flags:
+        for headline, description in parsed_manpage:
+            if flag in headline:
+                print(format_headline(headline))
+                print(format_description(description))
 
 
 if __name__ == '__main__':
