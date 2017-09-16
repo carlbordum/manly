@@ -8,7 +8,7 @@ FLAG_HEADLINE_PATTERN = r'^\s+%s.+.+'
 FLAG_SECTION_PATTERN = r'^%s\n(^\s+.+\n+)+'
 
 
-def _count_spaces(s):
+def count_spaces(s):
     """Return the amount of spaces at the start of *s*."""
     for count, char in enumerate(s):
         if char != ' ':
@@ -31,17 +31,17 @@ def get_flags(manpage):
     flags = []
     for headline, index in get_headlines(lines):
         description = []
-        indentation = _count_spaces(headline)
+        indentation = count_spaces(headline)
         i = index+1
         next_line = lines[i]
-        next_indentation = _count_spaces(next_line)
+        next_indentation = count_spaces(next_line)
         if next_indentation == 0:
             i += 1
             next_line = lines[i]
-            next_indentation = _count_spaces(next_line)
+            next_indentation = count_spaces(next_line)
         if next_indentation <= indentation:
             continue
-        while _count_spaces(next_line) == next_indentation:
+        while count_spaces(next_line) == next_indentation:
             description.append(next_line.strip())
             i += 1
             next_line = lines[i]
@@ -49,7 +49,7 @@ def get_flags(manpage):
     return flags
 
 
-def _format_flag_repr(headline, description):
+def format_flag_repr(headline, description):
     description[0] = description[0].capitalize()
     if description[-1][-1] != '.':
         description[-1] += '.'
@@ -60,26 +60,26 @@ def _format_flag_repr(headline, description):
     )
 
 
-def _get_flag_reprs(flags, option_section):
+def get_flag_reprs(flags, option_section):
     flag_reprs = []
     for flag in flags:
         description = []
         match = re.search(FLAG_HEADLINE_PATTERN % flag,
                           option_section, re.MULTILINE)
         flag_headline = match.group(0)[1:]
-        indentation = _count_spaces(flag_headline)
+        indentation = count_spaces(flag_headline)
         for line in option_section[match.end(0):].splitlines():
             if line == '':
                 continue
-            if _count_spaces(line) == indentation:
+            if count_spaces(line) == indentation:
                 break
             description.append(line.strip())
 
-        flag_reprs.append(_format_flag_repr(flag_headline, description))
+        flag_reprs.append(format_flag_repr(flag_headline, description))
     return flag_reprs
 
 
-def _parse_flags(raw_flags):
+def parse_flags(raw_flags):
     """Return a list of the flags in *raw_flags*."""
     flags = []
     for raw_flag in raw_flags:
@@ -93,12 +93,12 @@ def _parse_flags(raw_flags):
 
 def main():
     command = sys.argv[1]
-    flags = _parse_flags(sys.argv[2:])
+    flags = parse_flags(sys.argv[2:])
 
     manpage = subprocess.check_output(['man', command]).decode('utf-8')
     headline = re.search(HEADLINE_PATTERN, manpage, re.MULTILINE).group(0)
-    option_section = _get_options_section(manpage)
-    flag_reprs = _get_flag_reprs(flags, option_section)
+    option_section = get_options_section(manpage)
+    flag_reprs = get_flag_reprs(flags, option_section)
 
     print(headline)
     print('-' * len(headline))
