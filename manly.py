@@ -3,16 +3,17 @@ import subprocess
 import re
 
 
-def flag_parser(raw_flags):
-    '''Splits concatenated flags (eg. ls' "-la") in to individual flags
-    (eg. "-la" -> "-l", -"a".).
+def parse_flags(raw_flags):
+    '''Split concatenated flags (eg. ls' -la) into individual flags
+    (eg. '-la' -> '-l', '-a').
 
     Args:
         raw_flags (list): The flags as they would be given normally.
 
     Returns:
         flags (list): The disassembled concatenations of flags, and regular
-            verbose flags as given.'''
+            verbose flags as given.
+    '''
     flags = []
     for flag in raw_flags:
         if flag.startswith('-'):
@@ -36,7 +37,8 @@ def parse_manpage(page, args):
         args (iter): An iterable of flags passed to check against.
 
     Returns:
-        output (list): The blocks of the manpage that match the given flags.'''
+        output (list): The blocks of the manpage that match the given flags.
+    '''
     sections = []
     temp_sections = []
     output = []
