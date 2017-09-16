@@ -3,62 +3,67 @@ import subprocess
 import re
 
 
-def count_spaces(s):
-    """Return the amount of spaces at the start of *s*."""
-    for count, char in enumerate(s):
-        if char != ' ':
-            return count
-    return 0
-
-
-def get_headlines(manpage_lines):
-    """Return a list with (headline, index) for all flags."""
-    headlines = []
-    for i, headline in enumerate(manpage_lines):
-        if re.match(r'\s+--?\w', headline):
-            headlines.append((headline, i))
-    return headlines
-
-
-def parse_manpage(manpage):
-    """Return (headline, description) for all flags in *manpage*."""
-    lines = manpage.splitlines()
-    flags = []
-    for headline, index in get_headlines(lines):
-        description = []
-        indentation = count_spaces(headline)
-        i = index+1
-        next_line = lines[i]
-        next_indentation = count_spaces(next_line)
-        if next_indentation == 0:
-            i += 1
-            next_line = lines[i]
-            next_indentation = count_spaces(next_line)
-        if next_indentation <= indentation:
-            continue
-        while count_spaces(next_line) == next_indentation:
-            description.append(next_line.strip())
-            i += 1
-            next_line = lines[i]
-        flags.append((headline.strip(), description))
-    return flags
-
-
 def parse_flags(raw_flags):
-    """Return a list of the flags in *raw_flags*."""
+    '''Split concatenated flags (eg. ls' -la) into individual flags
+    (eg. '-la' -> '-l', '-a').
+
+    Args:
+        raw_flags (list): The flags as they would be given normally.
+
+    Returns:
+        flags (list): The disassembled concatenations of flags, and regular
+            verbose flags as given.
+    '''
     flags = []
-    for raw_flag in raw_flags:
-        if raw_flag.startswith('--'):
-            flags.append(raw_flag[:raw_flag.find('=')])
-        elif raw_flag.startswith('-'):
-            for flag in raw_flag[1:]:
-                flags.append('-' + flag)
+    for flag in raw_flags:
+        if flag.startswith('-'):
+            if not flag.startswith('--'):
+                flag = flag.replace('-', '')
+                for char in flag:
+                    flags.append('-' + char)
+            else:
+                flags.append(flag)
+        else:
+            pass
     return flags
 
 
-def format_description(description):
-    description[0] = ' '*7 + description[0]
-    return ('\n'+' '*7).join(description)
+def parse_manpage(page, args):
+    '''Scan the manpage for blocks of text, and check if the found blocks
+    have sections that match the general manpage-flag descriptor style.
+
+    Args:
+        page (str): The utf-8 encoded manpage.
+        args (iter): An iterable of flags passed to check against.
+
+    Returns:
+        output (list): The blocks of the manpage that match the given flags.
+    '''
+    sections = []
+    current_section = []
+    output = []
+
+    for line in page.splitlines():
+        line = line + '\n'
+        if line != '\n':
+            current_section.append(line)
+        else:
+            sections.append(''.join(current_section))
+            current_section = []
+
+    for section in sections:
+        section_top = section.strip().split('\n')[:2]
+        first_line = section_top[0].split(',')
+
+        for arg in args:
+            try:
+                if any(seg.strip().startswith(arg) for seg in first_line) \
+                  or section_top[1].strip().startswith(arg):
+                    output.append(section.rstrip())
+                    break
+            except IndexError:
+                pass
+    return output
 
 
 def main():
@@ -67,15 +72,17 @@ def main():
     manpage = subprocess.check_output(['man', command]).decode('utf-8')
 
     title = re.search(r'(?<=^NAME\n\s{7}).+', manpage, re.MULTILINE).group(0)
-    parsed_manpage = parse_manpage(manpage)
+    output = parse_manpage(manpage, flags)
 
-    print(title)
-    print('-' * len(title))
-    for flag in flags:
-        for headline, description in parsed_manpage:
-            if flag in headline:
-                print(headline)
-                print(format_description(description), end='\n\n')
+    print('\nSearching for:', command, *flags, '\n')
+    if output:
+        print(title)
+        print('-' * len(title))
+        for flag in output:
+            print(flag)
+    else:
+        print('No flags found.')
+    print()
 
 
 if __name__ == '__main__':
