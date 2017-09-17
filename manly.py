@@ -42,7 +42,6 @@ def parse_manpage(page, args):
     Returns:
         output (list): The blocks of the manpage that match the given flags.
     '''
-    sections = []
     current_section = []
     output = []
 
@@ -51,24 +50,22 @@ def parse_manpage(page, args):
         if line != '\n':
             current_section.append(line)
         else:
-            sections.append(''.join(current_section))
+            section = ''.join(current_section)
+            section_top = section.strip().split('\n')[:2]
+            first_line = section_top[0].split(',')
+
+            for arg in args:
+                try:
+                    if any(seg.strip().startswith(arg) for seg in first_line) \
+                      or section_top[1].strip().startswith(arg):
+                        section = re.sub(r'(^|\s){}'.format(arg),
+                                         _ANSI_BOLD.format(arg),
+                                         section)
+                        output.append(section.rstrip())
+                        break
+                except IndexError:
+                    pass
             current_section = []
-
-    for section in sections:
-        section_top = section.strip().split('\n')[:2]
-        first_line = section_top[0].split(',')
-
-        for arg in args:
-            try:
-                if any(seg.strip().startswith(arg) for seg in first_line) \
-                  or section_top[1].strip().startswith(arg):
-                    section = re.sub(r'(^|\s){}'.format(arg),
-                                     _ANSI_BOLD.format(arg),
-                                     section)
-                    output.append(section.rstrip())
-                    break
-            except IndexError:
-                pass
     return output
 
 
