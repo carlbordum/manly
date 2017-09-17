@@ -3,6 +3,9 @@ import subprocess
 import re
 
 
+_ANSI_BOLD = '\033[1m{}\033[0m'
+
+
 def parse_flags(raw_flags):
     '''Split concatenated flags (eg. ls' -la) into individual flags
     (eg. '-la' -> '-l', '-a').
@@ -59,6 +62,9 @@ def parse_manpage(page, args):
             try:
                 if any(seg.strip().startswith(arg) for seg in first_line) \
                   or section_top[1].strip().startswith(arg):
+                    section = re.sub(r'(^|\s){}'.format(arg),
+                                     _ANSI_BOLD.format(arg),
+                                     section)
                     output.append(section.rstrip())
                     break
             except IndexError:
@@ -71,15 +77,15 @@ def main():
     flags = parse_flags(sys.argv[2:])
     manpage = subprocess.check_output(['man', command]).decode('utf-8')
 
-    title = re.search(r'(?<=^NAME\n\s{7}).+', manpage, re.MULTILINE).group(0)
+    title = _ANSI_BOLD.format(re.search(r'(?<=^NAME\n\s{7}).+', manpage, re.MULTILINE).group(0))
     output = parse_manpage(manpage, flags)
 
     print('\nSearching for:', command, *flags, '\n')
     if output:
         print(title)
-        print('-' * len(title))
+        print('-' * len(title), '\n')
         for flag in output:
-            print(flag)
+            print(flag, '\n')
     else:
         print('No flags found.')
     print()
