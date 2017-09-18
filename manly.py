@@ -49,23 +49,24 @@ def parse_manpage(page, args):
         line = line + '\n'
         if line != '\n':
             current_section.append(line)
-        else:
-            section = ''.join(current_section)
-            section_top = section.strip().split('\n')[:2]
-            first_line = section_top[0].split(',')
+            continue
 
-            for arg in args:
-                try:
-                    if any(seg.strip().startswith(arg) for seg in first_line) \
-                      or section_top[1].strip().startswith(arg):
-                        section = re.sub(r'(^|\s){}'.format(arg),
-                                         _ANSI_BOLD.format(arg),
-                                         section)
-                        output.append(section.rstrip())
-                        break
-                except IndexError:
-                    pass
-            current_section = []
+        section = ''.join(current_section)
+        section_top = section.strip().split('\n')[:2]
+        first_line = section_top[0].split(',')
+
+        for arg in args:
+            try:
+                if any(seg.strip().startswith(arg) for seg in first_line) \
+                  or section_top[1].strip().startswith(arg):
+                    section = re.sub(r'(^|\s){}'.format(arg),
+                                     _ANSI_BOLD.format(arg),
+                                     section)
+                    output.append(section.rstrip())
+                    break
+            except IndexError:
+                pass
+        current_section = []
     return output
 
 
