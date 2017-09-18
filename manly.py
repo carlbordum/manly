@@ -19,15 +19,11 @@ def parse_flags(raw_flags):
     '''
     flags = []
     for flag in raw_flags:
-        if flag.startswith('-'):
-            if not flag.startswith('--'):
-                flag = flag.replace('-', '')
-                for char in flag:
-                    flags.append('-' + char)
-            else:
-                flags.append(flag)
-        else:
-            pass
+        if flag.startswith('--'):
+            flags.append(flag)
+        elif flag.startswith('-'):
+            for char in flag[1:]:
+                flags.append('-' + char)
     return flags
 
 
