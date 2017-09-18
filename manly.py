@@ -75,7 +75,8 @@ def main():
     flags = parse_flags(sys.argv[2:])
     manpage = subprocess.check_output(['man', command]).decode('utf-8')
 
-    title = _ANSI_BOLD.format(re.search(r'(?<=^NAME\n\s{7}).+', manpage, re.MULTILINE).group(0))
+    title = _ANSI_BOLD.format(
+            re.search(r'(?<=^NAME\n\s{7}).+', manpage, re.MULTILINE).group(0))
     output = parse_manpage(manpage, flags)
 
     print('\nSearching for:', command, *flags, '\n')
