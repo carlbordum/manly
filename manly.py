@@ -79,12 +79,12 @@ def main():
             re.search(r'(?<=^NAME\n\s{7}).+', manpage, re.MULTILINE).group(0))
     output = parse_manpage(manpage, flags)
 
-    print('\nSearching for:', command, *flags, '\n')
+    print('\nSearching for:', command, *flags, end='\n\n')
     if output:
         print(title)
-        print('-' * len(title), '\n')
+        print('=' * (len(title) - 8), end='\n\n')
         for flag in output:
-            print(flag, '\n')
+            print(flag, end='\n\n')
     else:
         print('No flags found.')
     print()
