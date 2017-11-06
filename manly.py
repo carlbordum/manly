@@ -1,3 +1,5 @@
+"""usage: manly [command] [options for that command]"""
+
 import sys
 import subprocess
 import re
@@ -67,9 +69,19 @@ def parse_manpage(page, args):
 
 
 def main():
-    command = sys.argv[1]
+    try:
+        command = sys.argv[1]
+    except IndexError:
+        print(__doc__)
+        sys.exit(0)
+    if len(sys.argv) == 2:
+        print('Please supply flags. Type just `manly` for help.')
+        sys.exit(2)
     flags = parse_flags(sys.argv[2:])
-    manpage = subprocess.check_output(['man', command]).decode('utf-8')
+    try:
+        manpage = subprocess.check_output(['man', command]).decode('utf-8')
+    except subprocess.CalledProcessError:
+        sys.exit(16)  # because that's the exit status that `man` uses.
 
     title = _ANSI_BOLD.format(
             re.search(r'(?<=^NAME\n\s{7}).+', manpage, re.MULTILINE).group(0))
