@@ -84,7 +84,11 @@ def main():
         sys.exit(16)  # because that's the exit status that `man` uses.
 
     title = _ANSI_BOLD.format(
-            re.search(r'(?<=^NAME\n\s{7}).+', manpage, re.MULTILINE).group(0))
+            re.search(
+                r'(?<=^NAME\n\s{5}).+',
+                manpage,
+                re.MULTILINE
+            ).group(0).strip())
     output = parse_manpage(manpage, flags)
 
     print('\nSearching for:', command, *flags, end='\n\n')
