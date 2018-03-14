@@ -1,4 +1,10 @@
-"""usage: manly [command] [options for that command]"""
+"""
+    manly
+    ~~~~~
+    This script is used (through its' cli) to extract information from
+    manual pages. More specifically, it tells the user, how the given
+    flags modify a programs behaviour.
+"""
 
 
 __author__ = 'Carl Bordum Hansen'
