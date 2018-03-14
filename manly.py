@@ -8,12 +8,14 @@ import re
 _ANSI_BOLD = '\033[1m{}\033[0m'
 
 
-def parse_flags(raw_flags):
+def parse_flags(raw_flags, single_dash=False):
     '''Split concatenated flags (eg. ls' -la) into individual flags
     (eg. '-la' -> '-l', '-a').
 
     Args:
         raw_flags (list): The flags as they would be given normally.
+        single_dash (bool): Indicate whether a manpage use long names
+            prefixed with only one dash e.g. -nostdinc
 
     Returns:
         flags (list): The disassembled concatenations of flags, and regular
@@ -21,7 +23,7 @@ def parse_flags(raw_flags):
     '''
     flags = []
     for flag in raw_flags:
-        if flag.startswith('--'):
+        if flag.startswith('--') or single_dash:
             flags.append(flag)
         elif flag.startswith('-'):
             for char in flag[1:]:
@@ -77,19 +79,21 @@ def main():
     if len(sys.argv) == 2:
         print('Please supply flags. Type just `manly` for help.')
         sys.exit(2)
-    flags = parse_flags(sys.argv[2:])
     try:
         manpage = subprocess.check_output(['man', command]).decode('utf-8')
     except subprocess.CalledProcessError:
         sys.exit(16)  # because that's the exit status that `man` uses.
 
+    uses_single_dash_names = any((re.match(r'\s+-\w{2,}', line) for line in
+        manpage.splitlines()))
+    flags = parse_flags(sys.argv[2:], uses_single_dash_names)
+    output = parse_manpage(manpage, flags)
     title = _ANSI_BOLD.format(
             re.search(
                 r'(?<=^NAME\n\s{5}).+',
                 manpage,
                 re.MULTILINE
             ).group(0).strip())
-    output = parse_manpage(manpage, flags)
 
     print('\nSearching for:', command, *flags, end='\n\n')
     if output:
