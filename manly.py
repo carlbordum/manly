@@ -116,6 +116,9 @@ def main():
         print("%s: missing flags\nTry '%s --help' for more information." % (
                 sys.argv[0], sys.argv[0]))
         sys.exit(2)
+    if sys.argv[1] == 'manly':
+        print('There are no turtles.')
+        sys.exit(0)
     try:
         manpage = subprocess.check_output(['man', command]).decode('utf-8')
     except subprocess.CalledProcessError:
