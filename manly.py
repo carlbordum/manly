@@ -109,8 +109,8 @@ def main():
     try:
         command = sys.argv[1]
     except IndexError:
-        print("%s: missing COMMAND\nTry '%s --help' for more information." % (
-            sys.argv[0], sys.argv[0]))
+        print("manly: missing COMMAND\n"
+              "Try 'manly --help' for more information.")
         sys.exit(0)
     if len(sys.argv) == 2:
         if sys.argv[1] in ('-h', '--help'):
@@ -119,8 +119,8 @@ def main():
         if sys.argv[1] in ('-v', '--version'):
             print(VERSION)
             sys.exit(0)
-        print("%s: missing flags\nTry '%s --help' for more information." % (
-                sys.argv[0], sys.argv[0]))
+        print("manly: missing flags\n"
+              "Try 'manly --help' for more information.")
         sys.exit(2)
     if sys.argv[1] == 'manly':
         print('There are no turtles.')
