@@ -1,11 +1,39 @@
 """usage: manly [command] [options for that command]"""
 
+
+__author__ = 'Carl Bordum Hansen'
+__version__ = '0.2.0'
+
+
 import sys
 import subprocess
 import re
 
 
 _ANSI_BOLD = '\033[1m{}\033[0m'
+
+
+HELP = """Usage: manly COMMAND FLAGS...
+explain commands
+
+Example:
+    $ manly rm -r
+
+    rm - remove files or directories
+    ================================
+
+        -r, -R, --recursive
+                remove directories and their contents recursively
+
+
+Arguments:
+  -h, --help            display this help and exit.
+  -v, --version         display version information and exit.
+
+Project resides at <https://github.com/Zaab1t/manly>"""
+VERSION = ('manly %s\nCopyright (c) 2017 %s.\nMIT License: see LICENSE.\n\n'
+           'Written by %s and Mark Jameson.') % (
+                   __version__, __author__, __author__)
 
 
 def parse_flags(raw_flags, single_dash=False):
@@ -71,21 +99,31 @@ def parse_manpage(page, args):
 
 
 def main():
+    # HANDLE ALL INPUT
     try:
         command = sys.argv[1]
     except IndexError:
-        print(__doc__)
+        print("%s: missing COMMAND\nTry '%s --help' for more information." % (
+            sys.argv[0], sys.argv[0]))
         sys.exit(0)
     if len(sys.argv) == 2:
-        print('Please supply flags. Type just `manly` for help.')
+        if sys.argv[1] in ('-h', '--help'):
+            print(HELP)
+            sys.exit(0)
+        if sys.argv[1] in ('-v', '--version'):
+            print(VERSION)
+            sys.exit(0)
+        print("%s: missing flags\nTry '%s --help' for more information." % (
+                sys.argv[0], sys.argv[0]))
         sys.exit(2)
     try:
         manpage = subprocess.check_output(['man', command]).decode('utf-8')
     except subprocess.CalledProcessError:
         sys.exit(16)  # because that's the exit status that `man` uses.
 
+    # LOGIC
     uses_single_dash_names = any((re.match(r'\s+-\w{2,}', line) for line in
-        manpage.splitlines()))
+                                  manpage.splitlines()))
     flags = parse_flags(sys.argv[2:], uses_single_dash_names)
     output = parse_manpage(manpage, flags)
     title = _ANSI_BOLD.format(
@@ -95,15 +133,14 @@ def main():
                 re.MULTILINE
             ).group(0).strip())
 
-    print('\nSearching for:', command, *flags, end='\n\n')
+    # OUTPUT
     if output:
-        print(title)
+        print('\n%s' % title)
         print('=' * (len(title) - 8), end='\n\n')
         for flag in output:
             print(flag, end='\n\n')
     else:
         print('No flags found.')
-    print()
 
 
 if __name__ == '__main__':
