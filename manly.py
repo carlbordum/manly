@@ -126,7 +126,10 @@ def main():
         print('There are no turtles.')
         sys.exit(0)
     try:
-        manpage = subprocess.check_output(['man', command]).decode('utf-8')
+        manpage = subprocess.check_output(
+            ['(export MANWIDTH=80; man %s)' % command],
+            shell=True,
+        ).decode('utf-8')
     except subprocess.CalledProcessError:
         sys.exit(16)  # because that's the exit status that `man` uses.
 
