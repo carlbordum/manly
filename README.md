@@ -37,8 +37,12 @@ and you can always remove it with
 
 ## Develop with me :)
 
+Ideas, contributions and everything else is welcome!
+
 ```bash
 $ git clone https://github.com/Zaab1t/manly
 $ cd manly
+$ virtualenv venv
+$ . venv/bin/activate
 $ python manly.py
 ```
