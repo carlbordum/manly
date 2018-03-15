@@ -1,0 +1,14 @@
+[build-system]
+requires = ["flit"]
+build-backend = "flit-buildapi"
+
+[tool.flit.metadata]
+module = "manly"
+author = "Carl Bordum Hansen"
+author-email = "carl@bordum.dk"
+home-page = "https://github.com/Zaab1t/manly"
+license = "MIT"
+description-file = "README.md"
+
+[tool.flit.scripts]
+manly = "manly:main"
