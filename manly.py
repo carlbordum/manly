@@ -20,7 +20,7 @@ import re
 _ANSI_BOLD = '\033[1m{}\033[0m'
 
 
-HELP = """Usage: manly [COMMAND] [FLAGS...]
+HELP = """Usage: manly COMMAND FLAGS...
 explain commands
 
 Example:
@@ -44,6 +44,8 @@ Arguments:
   -v, --version         display version information and exit.
 
 Project resides at <https://github.com/Zaab1t/manly>"""
+
+
 VERSION = ('manly %s\nCopyright (c) 2017 %s.\nMIT License: see LICENSE.\n\n'
            'Written by %s and Mark Jameson.') % (
                    __version__, __author__, __author__)
