@@ -5,10 +5,11 @@
     manual pages. More specifically, it tells the user, how the given
     flags modify a programs behaviour.
 """
+from __future__ import print_function
 
 
 __author__ = 'Carl Bordum Hansen'
-__version__ = '0.3.0'
+__version__ = '0.3.1'
 
 
 import sys
@@ -23,10 +24,16 @@ HELP = """Usage: manly COMMAND FLAGS...
 explain commands
 
 Example:
-    $ manly rm -r
+    $ manly rm --preserve-root -rf
 
     rm - remove files or directories
     ================================
+
+        -f, --force
+                ignore nonexistent files and arguments, never prompt
+
+        --preserve-root
+                do not remove '/' (default)
 
         -r, -R, --recursive
                 remove directories and their contents recursively
@@ -37,6 +44,8 @@ Arguments:
   -v, --version         display version information and exit.
 
 Project resides at <https://github.com/Zaab1t/manly>"""
+
+
 VERSION = ('manly %s\nCopyright (c) 2017 %s.\nMIT License: see LICENSE.\n\n'
            'Written by %s and Mark Jameson.') % (
                    __version__, __author__, __author__)

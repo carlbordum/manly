@@ -26,7 +26,7 @@ Short and sweet!
 
 
 ## Installation
-manly requires Python 3.
+manly supports Python 2 and 3
 
     $ pip install manly
 
