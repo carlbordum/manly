@@ -1,11 +1,9 @@
 # manly
 manly is a compliment to man pages.
+
 It's a lot like [explainshell](https://explainshell.com) (don't worry, that is explain-shell, not explains-hell).
 
-Use manly, when you want to know how flags modify a commands' behaviour.
-
-Let's say your good friend has a funky alias in [his dotfiles](https://github.com/8Banana/dotfiles/blob/master/__Myst__/.zshrc): `alias alert="notify-send -i terminal -t 5 'Alert from Terminal!'"`.
-manly to the rescue:
+Your good friend has a funky alias in [his dotfiles](https://github.com/8Banana/dotfiles/blob/master/__Myst__/.zshrc): `alias alert="notify-send -i terminal -t 5 'Alert from Terminal!'"`:
 
 ``` bash
 $ manly notify-send -it
@@ -28,7 +26,7 @@ Short and sweet!
 ## Installation
 manly supports Python 2 and 3
 
-    $ pip install manly
+    $ pip install --user manly
 
 and you can always remove it with
 
