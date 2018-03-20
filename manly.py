@@ -4,12 +4,17 @@
     This script is used (through its' cli) to extract information from
     manual pages. More specifically, it tells the user, how the given
     flags modify a programs behaviour.
+
+    In the code "options" refer to options for manly and "flags" refer
+    to options for the given program.
 """
+
+
 from __future__ import print_function
 
 
 __author__ = 'Carl Bordum Hansen'
-__version__ = '0.3.1'
+__version__ = '0.3.2'
 
 
 import sys
@@ -17,11 +22,12 @@ import subprocess
 import re
 
 
-_ANSI_BOLD = '\033[1m{}\033[0m'
+_ANSI_BOLD = '\033[1m%s\033[0m'
 
 
-HELP = """Usage: manly COMMAND FLAGS...
-explain commands
+HELP = """Usage: manly PROGRAM FLAGS...
+   or: manly OPTION
+Explain how FLAGS modify the PROGRAM's behaviour.
 
 Example:
     $ manly rm --preserve-root -rf
@@ -38,8 +44,7 @@ Example:
         -r, -R, --recursive
                 remove directories and their contents recursively
 
-
-Arguments:
+Options:
   -h, --help            display this help and exit.
   -v, --version         display version information and exit.
 
@@ -52,18 +57,11 @@ VERSION = ('manly %s\nCopyright (c) 2017 %s.\nMIT License: see LICENSE.\n\n'
 
 
 def parse_flags(raw_flags, single_dash=False):
-    '''Split concatenated flags (eg. ls' -la) into individual flags
-    (eg. '-la' -> '-l', '-a').
+    """Return a list of flags.
 
-    Args:
-        raw_flags (list): The flags as they would be given normally.
-        single_dash (bool): Indicate whether a manpage use long names
-            prefixed with only one dash e.g. -nostdinc
-
-    Returns:
-        flags (list): The disassembled concatenations of flags, and regular
-            verbose flags as given.
-    '''
+    If *single_dash* is False, concatenated flags will be split into
+    individual flags (eg. '-la' -> '-l', '-a').
+    """
     flags = []
     for flag in raw_flags:
         if flag.startswith('--') or single_dash:
@@ -74,51 +72,46 @@ def parse_flags(raw_flags, single_dash=False):
     return flags
 
 
-def parse_manpage(page, args):
-    '''Scan the manpage for blocks of text, and check if the found blocks
-    have sections that match the general manpage-flag descriptor style.
-
-    Args:
-        page (str): The utf-8 encoded manpage.
-        args (iter): An iterable of flags passed to check against.
-
-    Returns:
-        output (list): The blocks of the manpage that match the given flags.
-    '''
+def parse_manpage(page, flags):
+    """Return a list of blocks that match *flags* in *page*."""
     current_section = []
     output = []
 
     for line in page.splitlines():
-        line = line + '\n'
-        if line != '\n':
+        if line:
             current_section.append(line)
             continue
 
-        section = ''.join(current_section)
+        section = '\n'.join(current_section)
         section_top = section.strip().split('\n')[:2]
         first_line = section_top[0].split(',')
 
-        for arg in args:
-            try:
-                if any(seg.strip().startswith(arg) for seg in first_line) \
-                  or section_top[1].strip().startswith(arg):
-                    section = re.sub(r'(^|\s){}'.format(arg),
-                                     _ANSI_BOLD.format(arg),
-                                     section)
-                    output.append(section.rstrip())
+        segments = [seg.strip() for seg in first_line]
+        try:
+            segments.append(section_top[1].strip())
+        except IndexError:
+            ...
+
+        for flag in flags:
+            for segment in segments:
+                if segment.startswith(flag):
+                    output.append(re.sub(
+                            r'(^|\s)%s' % flag,
+                            _ANSI_BOLD % flag,
+                            section,
+                        ).rstrip()
+                    )
                     break
-            except IndexError:
-                pass
         current_section = []
     return output
 
 
 def main():
-    # HANDLE ALL INPUT
+    # ---------- PARSE INPUT ---------- #
     try:
         command = sys.argv[1]
     except IndexError:
-        print("manly: missing COMMAND\n"
+        print("manly: missing PROGRAM\n"
               "Try 'manly --help' for more information.")
         sys.exit(0)
     if len(sys.argv) == 2:
@@ -128,13 +121,12 @@ def main():
         if sys.argv[1] in ('-v', '--version'):
             print(VERSION)
             sys.exit(0)
-        print("manly: missing flags\n"
+        print("manly: missing OPTION or FLAGS\n"
               "Try 'manly --help' for more information.")
         sys.exit(2)
-    if sys.argv[1] == 'manly':
-        print('There are no turtles.')
-        sys.exit(0)
     try:
+        # we set MANWIDTH, so we don't rely on the users terminal width
+        # try `export MANWIDTH=80` -- makes manuals more readable imo :)
         manpage = subprocess.check_output(
             ['(export MANWIDTH=80; man %s)' % command],
             shell=True,
@@ -142,19 +134,20 @@ def main():
     except subprocess.CalledProcessError:
         sys.exit(16)  # because that's the exit status that `man` uses.
 
-    # LOGIC
-    uses_single_dash_names = any((re.match(r'\s+-\w{2,}', line) for line in
-                                  manpage.splitlines()))
-    flags = parse_flags(sys.argv[2:], uses_single_dash_names)
+    # ---------- MANLY LOGIC ---------- #
+    # programs such as `clang` use single dash names like "-nostdinc"
+    uses_single_dash_names = bool(re.search(r'\n\n\s+-\w{2,}', manpage))
+    flags = parse_flags(sys.argv[2:], single_dash=uses_single_dash_names)
     output = parse_manpage(manpage, flags)
-    title = _ANSI_BOLD.format(
-            re.search(
-                r'(?<=^NAME\n\s{5}).+',
-                manpage,
-                re.MULTILINE
-            ).group(0).strip())
+    title = _ANSI_BOLD % (
+        re.search(
+            r'(?<=^NAME\n\s{5}).+',
+            manpage,
+            re.MULTILINE
+        ).group(0).strip()
+    )
 
-    # OUTPUT
+    # ---------- WRITE OUTPUT ---------- #
     if output:
         print('\n%s' % title)
         print('=' * (len(title) - 8), end='\n\n')
