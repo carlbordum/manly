@@ -9,10 +9,12 @@ author-email = "carl@bordum.dk"
 home-page = "https://github.com/Zaab1t/manly"
 license = "MIT"
 description-file = "README.md"
-classifiers=Intended Audience :: Developers
-    License :: OSI Approved :: MIT License
-    Operating System :: POSIX
-    Topic :: Software Development :: Documentation
+classifiers = [
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX",
+    "Topic :: Software Development :: Documentation"
+]
 
 [tool.flit.scripts]
 manly = "manly:main"
