@@ -17,9 +17,9 @@ __author__ = "Carl Bordum Hansen"
 __version__ = "0.3.2"
 
 
-import sys
-import subprocess
 import re
+import subprocess
+import sys
 
 
 _ANSI_BOLD = "\033[1m%s\033[0m"
