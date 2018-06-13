@@ -23,6 +23,8 @@ import re
 
 
 _ANSI_BOLD = '\033[1m%s\033[0m'
+if not sys.stdout.isatty():
+    _ANSI_BOLD = '%s'
 
 
 HELP = """Usage: manly PROGRAM FLAGS...
