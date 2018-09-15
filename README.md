@@ -38,7 +38,7 @@ and you can always remove it with
 Ideas, contributions and everything else is welcome!
 
 ```bash
-$ git clone https://github.com/Zaab1t/manly
+$ git clone https://github.com/carlbordum/manly
 $ cd manly
 $ virtualenv venv
 $ . venv/bin/activate

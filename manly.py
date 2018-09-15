@@ -50,7 +50,7 @@ Options:
   -h, --help            display this help and exit.
   -v, --version         display version information and exit.
 
-Project resides at <https://github.com/Zaab1t/manly>"""
+Project resides at <https://github.com/carlbordum/manly>"""
 
 
 VERSION = (
