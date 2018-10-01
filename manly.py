@@ -93,7 +93,7 @@ def parse_manpage(page, flags):
         try:
             segments.append(section_top[1].strip())
         except IndexError:
-            ...
+            pass
 
         for flag in flags:
             for segment in segments:
