@@ -99,7 +99,8 @@ def parse_manpage(page, flags):
             for segment in segments:
                 if segment.startswith(flag):
                     output.append(
-                        re.sub(r"(^|\s)%s" % flag, _ANSI_BOLD % flag, section).rstrip()
+                        re.sub(r"(^|\s)%s" % flag, _ANSI_BOLD %
+                               flag, section).rstrip()
                     )
                     break
         current_section = []
@@ -129,7 +130,7 @@ def main():
         # we set MANWIDTH, so we don't rely on the users terminal width
         # try `export MANWIDTH=80` -- makes manuals more readable imo :)
         manpage = subprocess.check_output(
-            ["(export MANWIDTH=80; man %s)" % command], shell=True
+            ["(export MANWIDTH=80; man %s)" % command], shell=True, stderr=subprocess.DEVNULL,
         ).decode("utf-8")
     except subprocess.CalledProcessError:
         sys.exit(16)  # because that's the exit status that `man` uses.
@@ -140,7 +141,8 @@ def main():
     flags = parse_flags(sys.argv[2:], single_dash=uses_single_dash_names)
     output = parse_manpage(manpage, flags)
     title = _ANSI_BOLD % (
-        re.search(r"(?<=^NAME\n\s{5}).+", manpage, re.MULTILINE).group(0).strip()
+        re.search(r"(?<=^NAME\n\s{5}).+", manpage,
+                  re.MULTILINE).group(0).strip()
     )
 
     # ---------- WRITE OUTPUT ---------- #
