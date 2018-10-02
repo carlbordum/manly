@@ -5,10 +5,10 @@
     ~~~~~
     This script is used (through its' cli) to extract information from
     manual pages. More specifically, it tells the user, how the given
-    flags modify a programs behaviour.
+    flags modify a command's behaviour.
 
     In the code "options" refer to options for manly and "flags" refer
-    to options for the given program.
+    to options for the given command.
 """
 
 
@@ -115,7 +115,7 @@ def main(command):
         sys.exit(16)  # because that's the exit status that `man` uses.
 
     # ---------- MANLY LOGIC ---------- #
-    # programs such as `clang` use single dash names like "-nostdinc"
+    # commands such as `clang` use single dash names like "-nostdinc"
     uses_single_dash_names = bool(re.search(r"\n\n\s+-\w{2,}", manpage))
     flags = parse_flags(flags, single_dash=uses_single_dash_names)
     output = parse_manpage(manpage, flags)
@@ -135,7 +135,7 @@ def main(command):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog='manly',
-        description="Explain how FLAGS modify a PROGRAM's behaviour.",
+        description="Explain how FLAGS modify a COMMAND's behaviour.",
         epilog=USAGE_EXAMPLE,
         formatter_class=RawTextHelpFormatter)
     parser.add_argument('command',
@@ -147,4 +147,7 @@ if __name__ == "__main__":
                         help='display verison information and exit')
     args = parser.parse_args()
 
-    main(args.command)
+    if not len(args.command):
+        print("manly: missing COMMAND\n" "Try 'manly --help' for more information.")
+    else:
+        main(args.command)
