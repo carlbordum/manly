@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
     manly
     ~~~~~
@@ -17,6 +19,8 @@ __author__ = "Carl Bordum Hansen"
 __version__ = "0.3.3"
 
 
+import argparse
+from argparse import RawTextHelpFormatter
 import re
 import subprocess
 import sys
@@ -26,12 +30,7 @@ _ANSI_BOLD = "\033[1m%s\033[0m"
 if not sys.stdout.isatty():
     _ANSI_BOLD = "%s"
 
-
-HELP = """Usage: manly PROGRAM FLAGS...
-   or: manly OPTION
-Explain how FLAGS modify the PROGRAM's behaviour.
-
-Example:
+USAGE_EXAMPLE = """Example:
     $ manly rm --preserve-root -rf
 
     rm - remove files or directories
@@ -44,14 +43,7 @@ Example:
                 do not remove '/' (default)
 
         -r, -R, --recursive
-                remove directories and their contents recursively
-
-Options:
-  -h, --help            display this help and exit.
-  -v, --version         display version information and exit.
-
-Project resides at <https://github.com/carlbordum/manly>"""
-
+                remove directories and their contents recursively"""
 
 VERSION = (
     "manly %s\nCopyright (c) 2017 %s.\nMIT License: see LICENSE.\n\n"
@@ -106,30 +98,18 @@ def parse_manpage(page, flags):
     return output
 
 
-def main():
+def main(command):
     # ---------- PARSE INPUT ---------- #
-    try:
-        command = sys.argv[1]
-    except IndexError:
-        print("manly: missing PROGRAM\n" "Try 'manly --help' for more information.")
-        sys.exit(0)
-    if len(sys.argv) == 2:
-        if sys.argv[1] in ("-h", "--help"):
-            print(HELP)
-            sys.exit(0)
-        if sys.argv[1] in ("-v", "--version"):
-            print(VERSION)
-            sys.exit(0)
-        print(
-            "manly: missing OPTION or FLAGS\n"
-            "Try 'manly --help' for more information."
-        )
-        sys.exit(2)
+    if isinstance(command, str):
+        command = command.split(' ')
+    program = command[0]
+    flags = command[1:]
+
     try:
         # we set MANWIDTH, so we don't rely on the users terminal width
         # try `export MANWIDTH=80` -- makes manuals more readable imo :)
         manpage = subprocess.check_output(
-            ["(export MANWIDTH=80; man %s)" % command], shell=True
+            ["(export MANWIDTH=80; man %s)" % program], shell=True
         ).decode("utf-8")
     except subprocess.CalledProcessError:
         sys.exit(16)  # because that's the exit status that `man` uses.
@@ -137,7 +117,7 @@ def main():
     # ---------- MANLY LOGIC ---------- #
     # programs such as `clang` use single dash names like "-nostdinc"
     uses_single_dash_names = bool(re.search(r"\n\n\s+-\w{2,}", manpage))
-    flags = parse_flags(sys.argv[2:], single_dash=uses_single_dash_names)
+    flags = parse_flags(flags, single_dash=uses_single_dash_names)
     output = parse_manpage(manpage, flags)
     title = _ANSI_BOLD % (
         re.search(r"(?<=^NAME\n\s{5}).+", manpage, re.MULTILINE).group(0).strip()
@@ -154,4 +134,17 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(prog='manly',
+        description="Explain how FLAGS modify a PROGRAM's behaviour.",
+        epilog=USAGE_EXAMPLE,
+        formatter_class=RawTextHelpFormatter)
+    parser.add_argument('command',
+                        nargs=argparse.REMAINDER,
+                        help='')
+    parser.add_argument('-v', '--version',
+                        action='version',
+                        version=VERSION,
+                        help='display verison information and exit')
+    args = parser.parse_args()
+
+    main(args.command)
