@@ -30,7 +30,7 @@ _ANSI_BOLD = "\033[1m%s\033[0m"
 if not sys.stdout.isatty():
     _ANSI_BOLD = "%s"
 
-USAGE_EXAMPLE = """Example:
+USAGE_EXAMPLE = """example:
     $ manly rm --preserve-root -rf
 
     rm - remove files or directories
@@ -101,7 +101,7 @@ def parse_manpage(page, flags):
 def main(command):
     # ---------- PARSE INPUT ---------- #
     if isinstance(command, str):
-        command = command.split(' ')
+        command = command.split(" ")
     program = command[0]
     flags = command[1:]
 
@@ -134,17 +134,20 @@ def main(command):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(prog='manly',
+    parser = argparse.ArgumentParser(
+        prog="manly",
         description="Explain how FLAGS modify a COMMAND's behaviour.",
         epilog=USAGE_EXAMPLE,
-        formatter_class=RawTextHelpFormatter)
-    parser.add_argument('command',
-                        nargs=argparse.REMAINDER,
-                        help='')
-    parser.add_argument('-v', '--version',
-                        action='version',
-                        version=VERSION,
-                        help='display verison information and exit')
+        formatter_class=RawTextHelpFormatter,
+    )
+    parser.add_argument("command", nargs=argparse.REMAINDER, help="")
+    parser.add_argument(
+        "-v",
+        "--version",
+        action="version",
+        version=VERSION,
+        help="display version information and exit",
+    )
     args = parser.parse_args()
 
     if not len(args.command):
