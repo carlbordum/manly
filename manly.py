@@ -125,14 +125,8 @@ def main(command):
         re.search(r"(?<=^NAME\n\s{5}).+", manpage, re.MULTILINE).group(0).strip()
     )
 
-    # ---------- WRITE OUTPUT ---------- #
-    if output:
-        print("\n%s" % title)
-        print("=" * (len(title) - 8), end="\n\n")
-        for flag in output:
-            print(flag, end="\n\n")
-    else:
-        print("No flags found.")
+    # ---------- RETURN OUTPUT ---------- #
+    return title, output
 
 
 if __name__ == "__main__":
@@ -155,4 +149,12 @@ if __name__ == "__main__":
     if not len(args.command):
         print("manly: missing COMMAND\n" "Try 'manly --help' for more information.")
     else:
-        main(args.command)
+        title, output=main(args.command)
+        # ---------- WRITE OUTPUT ---------- #
+        if output:
+            print("\n%s" % title)
+            print("=" * (len(title) - 8), end="\n\n")
+            for flag in output:
+                print(flag, end="\n\n")
+        else:
+            print("No flags found.")
