@@ -97,14 +97,7 @@ def parse_manpage(page, flags):
         current_section = []
     return output
 
-
-def main(command):
-    # ---------- PARSE INPUT ---------- #
-    if isinstance(command, str):
-        command = command.split(" ")
-    program = command[0]
-    flags = command[1:]
-
+def get_manpage(program):
     try:
         # we set MANWIDTH, so we don't rely on the users terminal width
         # try `export MANWIDTH=80` -- makes manuals more readable imo :)
@@ -115,6 +108,25 @@ def main(command):
         ).decode("utf-8")
     except subprocess.CalledProcessError:
         sys.exit(16)  # because that's the exit status that `man` uses.
+    return manpage
+
+def split_command(command):
+    subcommand_tools = ['git', 'flatpak', 'docker', 'ostree', 'openssl']
+    manprog = '%s' % command[0]
+    if command[0] in subcommand_tools:
+        for c in command[1:]:
+            if not c.startswith('-'):
+                manprog = '%s-%s' % (command[0], c)
+                break
+    return (manprog, command[1:])
+
+def main(command):
+    # ---------- PARSE INPUT ---------- #
+    if isinstance(command, str):
+        command = command.split(" ")
+    program, flags = split_command(command)
+
+    manpage = get_manpage(program)
 
     # ---------- MANLY LOGIC ---------- #
     # commands such as `clang` use single dash names like "-nostdinc"
