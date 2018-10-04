@@ -99,7 +99,6 @@ def parse_manpage(page, flags):
 
 
 def main(command):
-    # ---------- PARSE INPUT ---------- #
     if isinstance(command, str):
         command = command.split(" ")
     program = command[0]
@@ -116,7 +115,6 @@ def main(command):
     except subprocess.CalledProcessError:
         sys.exit(16)  # because that's the exit status that `man` uses.
 
-    # ---------- MANLY LOGIC ---------- #
     # commands such as `clang` use single dash names like "-nostdinc"
     uses_single_dash_names = bool(re.search(r"\n\n\s+-\w{2,}", manpage))
     flags = parse_flags(flags, single_dash=uses_single_dash_names)
@@ -125,7 +123,6 @@ def main(command):
         re.search(r"(?<=^NAME\n\s{5}).+", manpage, re.MULTILINE).group(0).strip()
     )
 
-    # ---------- RETURN OUTPUT ---------- #
     return title, output
 
 
@@ -148,13 +145,13 @@ if __name__ == "__main__":
 
     if not len(args.command):
         print("manly: missing COMMAND\n" "Try 'manly --help' for more information.")
+        sys.exit(0)
+
+    title, output = main(args.command)
+    if output:
+        print("\n%s" % title)
+        print("=" * (len(title) - 8), end="\n\n")
+        for flag in output:
+            print(flag, end="\n\n")
     else:
-        title, output=main(args.command)
-        # ---------- WRITE OUTPUT ---------- #
-        if output:
-            print("\n%s" % title)
-            print("=" * (len(title) - 8), end="\n\n")
-            for flag in output:
-                print(flag, end="\n\n")
-        else:
-            print("No flags found.")
+        print("No flags found.")
