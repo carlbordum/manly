@@ -24,6 +24,7 @@ from argparse import RawTextHelpFormatter
 import re
 import subprocess
 import sys
+from subprocess import PIPE
 
 
 _ANSI_BOLD = "\033[1m%s\033[0m"
@@ -104,16 +105,15 @@ def main(command):
     program = command[0]
     flags = command[1:]
 
-    try:
-        # we set MANWIDTH, so we don't rely on the users terminal width
-        # try `export MANWIDTH=80` -- makes manuals more readable imo :)
-        manpage = subprocess.check_output(
-            ["(export MANWIDTH=80; man %s)" % program],
-            shell=True,
-            stderr=subprocess.DEVNULL,
-        ).decode("utf-8")
-    except subprocess.CalledProcessError:
-        sys.exit(16)  # because that's the exit status that `man` uses.
+    # we set MANWIDTH, so we don't rely on the users terminal width
+    # try `export MANWIDTH=80` -- makes manuals more readable imo :)
+    process = subprocess.Popen("export MANWIDTH=80; man %s" % program, stdout=PIPE, stderr=PIPE, shell=True)
+    out, err = process.communicate()
+    if process.returncode == 0:
+        manpage = out.decode('utf-8')
+    else:
+        print(err.decode('utf-8'))
+        sys.exit(process.returncode)
 
     # commands such as `clang` use single dash names like "-nostdinc"
     uses_single_dash_names = bool(re.search(r"\n\n\s+-\w{2,}", manpage))
