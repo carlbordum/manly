@@ -112,7 +112,7 @@ def main(command):
     if process.returncode == 0:
         manpage = out.decode('utf-8')
     else:
-        print(err.decode('utf-8'))
+        print(err.decode('utf-8'), file=sys.stderr)
         sys.exit(process.returncode)
 
     # commands such as `clang` use single dash names like "-nostdinc"
