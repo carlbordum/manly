@@ -104,18 +104,24 @@ def main(command):
         command = command.split(" ")
     program = command[0]
     flags = command[1:]
+    
+    try:
+        # try `export MANWIDTH=80` -- makes manuals more readable imo :)
 
-    # we set MANWIDTH, so we don't rely on the users terminal width
-    # try `export MANWIDTH=80` -- makes manuals more readable imo :)
-    process = subprocess.Popen(
-        "export MANWIDTH=80; man %s" % program, stdout=PIPE, stderr=PIPE, shell=True
-    )
-    out, err = process.communicate()
-    if process.returncode == 0:
-        manpage = out.decode("utf-8")
-    else:
-        print(err.decode("utf-8"), file=sys.stderr)
-        sys.exit(process.returncode)
+        # find current terminal width and subtract 2 for padding
+        output_width = int(subprocess.check_output(['stty', 'size']).decode().split()[1]) - 2
+
+        # set output_width to 80 if terminal is larger than 80
+        if output_width > 80:
+            output_width = 80
+
+        manpage = subprocess.check_output(
+            ["(export MANWIDTH=%s; man %s)" % (output_width, program)],
+            shell=True,
+            stderr=subprocess.DEVNULL,
+        ).decode("utf-8")
+    except subprocess.CalledProcessError:
+        sys.exit(16)  # because that's the exit status that `man` uses.
 
     # commands such as `clang` use single dash names like "-nostdinc"
     uses_single_dash_names = bool(re.search(r"\n\n\s+-\w{2,}", manpage))
