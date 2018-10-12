@@ -24,6 +24,7 @@ from argparse import RawTextHelpFormatter
 import re
 import subprocess
 import sys
+from subprocess import PIPE
 
 
 _ANSI_BOLD = "\033[1m%s\033[0m"
@@ -103,7 +104,7 @@ def main(command):
         command = command.split(" ")
     program = command[0]
     flags = command[1:]
-
+    
     try:
         # try `export MANWIDTH=80` -- makes manuals more readable imo :)
 
