@@ -105,10 +105,17 @@ def main(command):
     flags = command[1:]
 
     try:
-        # we set MANWIDTH, so we don't rely on the users terminal width
         # try `export MANWIDTH=80` -- makes manuals more readable imo :)
+
+        # find current terminal width and subtract 2 for padding
+        output_width = int(subprocess.check_output(['stty', 'size']).decode().split()[1]) - 2
+
+        # set output_width to 80 if terminal is larger than 80
+        if output_width > 80:
+            output_width = 80
+
         manpage = subprocess.check_output(
-            ["(export MANWIDTH=80; man %s)" % program],
+            ["(export MANWIDTH=%s; man %s)" % (output_width, program)],
             shell=True,
             stderr=subprocess.DEVNULL,
         ).decode("utf-8")
