@@ -107,12 +107,14 @@ def main(command):
 
     # we set MANWIDTH, so we don't rely on the users terminal width
     # try `export MANWIDTH=80` -- makes manuals more readable imo :)
-    process = subprocess.Popen("export MANWIDTH=80; man %s" % program, stdout=PIPE, stderr=PIPE, shell=True)
+    process = subprocess.Popen(
+        "export MANWIDTH=80; man %s" % program, stdout=PIPE, stderr=PIPE, shell=True
+    )
     out, err = process.communicate()
     if process.returncode == 0:
-        manpage = out.decode('utf-8')
+        manpage = out.decode("utf-8")
     else:
-        print(err.decode('utf-8'), file=sys.stderr)
+        print(err.decode("utf-8"), file=sys.stderr)
         sys.exit(process.returncode)
 
     # commands such as `clang` use single dash names like "-nostdinc"
