@@ -55,7 +55,7 @@ VERSION = (
 def parse_flags(raw_flags):
     """Return a list of flags.
 
-    If *single_dash* is False, concatenated flags will be split into
+    Concatenated flags will be split into
     individual flags (eg. '-la' -> '-l', '-a').
     """
     flags = []
