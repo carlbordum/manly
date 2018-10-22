@@ -112,10 +112,14 @@ def manly(command):
         shell=True,
     )
     out, err = process.communicate()
+
     if process.returncode == 0:
         manpage = out.decode("utf-8")
     else:
-        print(err.decode("utf-8"), file=sys.stderr)
+        if "not found" in err.decode("utf-8"):
+            print("man not found in your path. Please install it or add it to your path", file=sys.stderr)
+        else:
+            print(err.decode("utf-8"), file=sys.stderr)
         sys.exit(process.returncode)
 
     # commands such as `clang` use single dash names like "-nostdinc"
