@@ -20,11 +20,9 @@ __version__ = "0.3.3"
 
 
 import argparse
-from argparse import RawTextHelpFormatter
 import re
 import subprocess
 import sys
-from subprocess import PIPE
 
 
 _ANSI_BOLD = "\033[1m%s\033[0m"
@@ -99,7 +97,7 @@ def parse_manpage(page, flags):
     return output
 
 
-def main(command):
+def manly(command):
     if isinstance(command, str):
         command = command.split(" ")
     program = command[0]
@@ -108,7 +106,10 @@ def main(command):
     # we set MANWIDTH, so we don't rely on the users terminal width
     # try `export MANWIDTH=80` -- makes manuals more readable imo :)
     process = subprocess.Popen(
-        "export MANWIDTH=80; man %s" % program, stdout=PIPE, stderr=PIPE, shell=True
+        "export MANWIDTH=80; man %s" % program,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        shell=True,
     )
     out, err = process.communicate()
     if process.returncode == 0:
@@ -128,12 +129,12 @@ def main(command):
     return title, output
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(
         prog="manly",
         description="Explain how FLAGS modify a COMMAND's behaviour.",
         epilog=USAGE_EXAMPLE,
-        formatter_class=RawTextHelpFormatter,
+        formatter_class=argparse.RawTextHelpFormatter,
     )
     parser.add_argument("command", nargs=argparse.REMAINDER, help="")
     parser.add_argument(
@@ -141,7 +142,7 @@ if __name__ == "__main__":
         "--version",
         action="version",
         version=VERSION,
-        help="display version information and exit",
+        help="display version information and exit.",
     )
     args = parser.parse_args()
 
@@ -149,7 +150,7 @@ if __name__ == "__main__":
         print("manly: missing COMMAND\n" "Try 'manly --help' for more information.")
         sys.exit(0)
 
-    title, output = main(args.command)
+    title, output = manly(args.command)
     if output:
         print("\n%s" % title)
         print("=" * (len(title) - 8), end="\n\n")
@@ -157,3 +158,7 @@ if __name__ == "__main__":
             print(flag, end="\n\n")
     else:
         print("No flags found.")
+
+
+if __name__ == "__main__":
+    main()
