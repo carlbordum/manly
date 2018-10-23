@@ -116,10 +116,13 @@ def manly(command):
     if process.returncode == 0:
         manpage = out.decode("utf-8")
     else:
-        if "not found" in err.decode("utf-8"):
-            print("man not found in your path. Please install it or add it to your path", file=sys.stderr)
+        if process.returncode == 126:
+            error_msg = "Error: 'man' is not executable."
+        elif process.returncode == 127:
+            error_msg = "Error: 'man' not found in your path. Please install it or add it to your path.2w"
         else:
-            print(err.decode("utf-8"), file=sys.stderr)
+            error_msg = err.decode("utf-8")
+        print(error_msg, file=sys.stdout)
         sys.exit(process.returncode)
 
     # commands such as `clang` use single dash names like "-nostdinc"
