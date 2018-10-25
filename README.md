@@ -42,5 +42,11 @@ $ git clone https://github.com/carlbordum/manly
 $ cd manly
 $ virtualenv venv
 $ . venv/bin/activate
+$ pip install -r requirements.txt
 $ python manly.py
+```
+
+Make sure test locally before sending a Pull Request using:
+```
+py.test
 ```
