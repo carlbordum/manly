@@ -32,6 +32,9 @@ and you can always remove it with
 
     $ pip uninstall manly
 
+An unofficial Arch User Repository is maintained by mpolidori at
+https://aur.archlinux.org/packages/manly/.
+
 
 ## Develop with me :)
 
