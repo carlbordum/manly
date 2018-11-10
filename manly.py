@@ -117,9 +117,9 @@ def manly(command):
         manpage = out.decode("utf-8")
     else:
         if process.returncode == 126:
-            error_msg = "Error: 'man' is not executable."
+            error_msg = "Error: 'man' not executable."
         elif process.returncode == 127:
-            error_msg = "Error: 'man' not found in your path. Please install it or add it to your path.2w"
+            error_msg = "Error: 'man' not found in your path. Please install it or add it to your path."
         else:
             error_msg = err.decode("utf-8")
         print(error_msg, file=sys.stdout)
