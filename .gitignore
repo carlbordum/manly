@@ -102,3 +102,6 @@ ENV/
 
 # Editor config
 .vscode
+
+# Pycharm config
+.idea
