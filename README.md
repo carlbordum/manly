@@ -31,6 +31,14 @@ manly supports Python 2 and 3
 and you can always remove it with
 
     $ pip uninstall manly
+    
+for python 3, replace pip with pip3
+
+    $ pip3 install --user manly
+    
+and for removing it
+    
+    $ pip3 uninstall manly
 
 An unofficial Arch User Repository is maintained by mpolidori at
 https://aur.archlinux.org/packages/manly/.
