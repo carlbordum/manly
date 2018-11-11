@@ -2,7 +2,7 @@ from manly import manly
 
 
 def test_command_with_flags():
-    title, output = manly('ls -a')
+    title, output = manly('ls', '-a')
     assert title == 'ls - list directory contents'
 
 
