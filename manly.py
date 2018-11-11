@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 
-"""
-    manly
-    ~~~~~
-    This script is used (through its' cli) to extract information from
-    manual pages. More specifically, it tells the user, how the given
-    flags modify a command's behaviour.
+"""manly
 
-    In the code "options" refer to options for manly and "flags" refer
-    to options for the given command.
+This script is used (through its' cli) to extract information from
+manual pages. More specifically, it tells the user, how the given
+flags modify a command's behaviour.
+
+In the code "options" refer to options for manly and "flags" refer
+to options for the given command.
 """
 
 
@@ -21,33 +20,14 @@ __version__ = "0.3.3"
 
 import argparse
 import re
+import shlex
 import subprocess
 import sys
 
 
-_ANSI_BOLD = "\033[1m%s\033[0m"
-if not sys.stdout.isatty():
-    _ANSI_BOLD = "%s"
-
-USAGE_EXAMPLE = """example:
-    $ manly rm --preserve-root -rf
-
-    rm - remove files or directories
-    ================================
-
-        -f, --force
-                ignore nonexistent files and arguments, never prompt
-
-        --preserve-root
-                do not remove '/' (default)
-
-        -r, -R, --recursive
-                remove directories and their contents recursively"""
-
-VERSION = (
-    "manly %s\nCopyright (c) 2017 %s.\nMIT License: see LICENSE.\n\n"
-    "Written by %s and Mark Jameson."
-) % (__version__, __author__, __author__)
+_ANSI_BOLD = "%s"
+if sys.stdout.isatty():
+    _ANSI_BOLD = "\033[1m%s\033[0m"
 
 
 def parse_flags(raw_flags, single_dash=False):
@@ -97,16 +77,12 @@ def parse_manpage(page, flags):
     return output
 
 
-def manly(command):
-    if isinstance(command, str):
-        command = command.split(" ")
-    program = command[0]
-    flags = command[1:]
-
+def manly(program, flags):
+    flags = flags.split()
     # we set MANWIDTH, so we don't rely on the users terminal width
     # try `export MANWIDTH=80` -- makes manuals more readable imo :)
     process = subprocess.Popen(
-        "export MANWIDTH=80; man %s" % program,
+        "export MANWIDTH=80; man %s" % shlex.quote(program),
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         shell=True,
@@ -136,6 +112,27 @@ def manly(command):
     return title, output
 
 
+USAGE_EXAMPLE = """example:
+    $ manly rm --preserve-root -rf
+
+    rm - remove files or directories
+    ================================
+
+        -f, --force
+                ignore nonexistent files and arguments, never prompt
+
+        --preserve-root
+                do not remove '/' (default)
+
+        -r, -R, --recursive
+                remove directories and their contents recursively"""
+
+VERSION = (
+    "manly %s\nCopyright (c) 2017 %s.\nMIT License: see LICENSE.\n\n"
+    "Written by %s and Mark Jameson."
+) % (__version__, __author__, __author__)
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog="manly",
@@ -143,7 +140,8 @@ def main():
         epilog=USAGE_EXAMPLE,
         formatter_class=argparse.RawTextHelpFormatter,
     )
-    parser.add_argument("command", nargs=argparse.REMAINDER, help="")
+    parser.add_argument("program", help="")
+    parser.add_argument("flags", nargs=argparse.REMAINDER, help="")
     parser.add_argument(
         "-v",
         "--version",
@@ -153,11 +151,8 @@ def main():
     )
     args = parser.parse_args()
 
-    if not len(args.command):
-        print("manly: missing COMMAND\n" "Try 'manly --help' for more information.")
-        sys.exit(0)
 
-    title, output = manly(args.command)
+    title, output = manly(program, flags)
     if output:
         print("\n%s" % title)
         print("=" * (len(title) - 8), end="\n\n")
