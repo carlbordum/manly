@@ -77,7 +77,7 @@ def parse_manpage(page, flags):
     return output
 
 
-def manly(program, flags):
+def manly(program, flags=''):
     flags = flags.split()
     # we set MANWIDTH, so we don't rely on the users terminal width
     # try `export MANWIDTH=80` -- makes manuals more readable imo :)
