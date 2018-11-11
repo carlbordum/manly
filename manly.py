@@ -20,7 +20,6 @@ __version__ = "0.3.3"
 
 import argparse
 import re
-import shlex
 import subprocess
 import sys
 
@@ -82,7 +81,7 @@ def manly(program, flags=''):
     # we set MANWIDTH, so we don't rely on the users terminal width
     # try `export MANWIDTH=80` -- makes manuals more readable imo :)
     process = subprocess.Popen(
-        "export MANWIDTH=80; man %s" % shlex.quote(program),
+        "export MANWIDTH=80; man %s" % program,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         shell=True,
