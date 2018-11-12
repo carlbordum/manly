@@ -80,10 +80,10 @@ def manly(program, flags=()):
     # we set MANWIDTH, so we don't rely on the users terminal width
     # try `export MANWIDTH=80` -- makes manuals more readable imo :)
     process = subprocess.Popen(
-        "export MANWIDTH=80; man %s" % program,
+        ["man", "--", program],
+        env={"MANWIDTH": "80"},
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        shell=True,
     )
     out, err = process.communicate()
 
