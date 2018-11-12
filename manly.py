@@ -151,7 +151,7 @@ def main():
     args = parser.parse_args()
 
 
-    title, output = manly(program, flags)
+    title, output = manly(args.program, args.flags)
     if output:
         print("\n%s" % title)
         print("=" * (len(title) - 8), end="\n\n")
