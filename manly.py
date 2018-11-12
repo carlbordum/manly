@@ -33,18 +33,16 @@ def parse_flags(raw_flags):
     """Return a list of flags.
 
     Concatenated flags will be split into
-    individual flags (eg. '-la' -> '-l', '-a').
+    individual flags (eg. '-la' -> '-la', '-l', '-a').
     """
-    flags = []
+    flags = set()
     for flag in raw_flags:
-        if flag.startswith("--"):
-            flags.append(flag)
-        elif flag.startswith("-"):
-            if len(flag) > 2:
-                flags.append(flag)
-            for char in flag[1:]:
-                flags.append("-" + char)
-    return flags
+        if not flag.startswith("-"):  # not a flag?
+            continue
+        flags.add(flag)
+        if not flag.startswith("--"):  # single -
+            flags |= {"-" + char for char in flag[1:]}
+    return list(flags)
 
 
 def parse_manpage(page, flags):
