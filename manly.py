@@ -25,9 +25,9 @@ import subprocess
 import sys
 
 
-_ANSI_BOLD = "\033[1m%s\033[0m"
-if not sys.stdout.isatty():
-    _ANSI_BOLD = "%s"
+_ANSI_BOLD = "%s"
+if sys.stdout.isatty():
+    _ANSI_BOLD = "\033[1m%s\033[0m"
 
 USAGE_EXAMPLE = """example:
     $ manly rm --preserve-root -rf
