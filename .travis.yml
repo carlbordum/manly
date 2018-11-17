@@ -4,11 +4,15 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
+addons:
+  apt:
+    packages:
+      - python3-pip
 before_install:
-  - sudo apt-get -y update
-  - sudo apt-get -y install python3-pip
-  - sudo apt-get -y install python3-dev python3-setuptools
+  - sudo pip3 install flit
 install:
-  - pip install -r requirements.txt
+  - 'flit install --python "$(which python)"'
 script:
+  - manly --version
   - py.test
+  - manly ls -lAh

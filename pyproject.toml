@@ -16,5 +16,10 @@ classifiers = [
     "Topic :: Software Development :: Documentation"
 ]
 
+[tool.flit.metadata.requires-extra]
+test = [
+    "pytest ~= 3.9.2",
+]
+
 [tool.flit.scripts]
 manly = "manly:main"
