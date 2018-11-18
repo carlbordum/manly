@@ -18,9 +18,13 @@ __version__ = "0.4.0"
 
 
 import argparse
+import functools
 import re
 import subprocess
 import sys
+
+
+print_err = functools.partial(print, file=sys.stderr)
 
 
 # A backport from subprocess to cover differences between 2/3.4 and 3.5
@@ -133,11 +137,11 @@ def manly(command):
                 process.returncode, ["man", "--", program], out, err
             )
     except OSError as e:
-        print("manly: Could not execute 'man'", file=sys.stderr)
-        print(e, file=sys.stderr)
+        print_err("manly: Could not execute 'man'")
+        print_err(e)
         sys.exit(127)
     except CalledProcessError as e:
-        print(e.stderr.strip(), file=sys.stderr)
+        print_err(e.stderr.strip())
         sys.exit(e.returncode)
 
     manpage = out
@@ -168,9 +172,8 @@ def main():
     args = parser.parse_args()
 
     if not len(args.command):
-        print(
+        print_err(
             "manly: missing COMMAND\nTry 'manly --help' for more information.",
-            file=sys.stderr,
         )
         sys.exit(0)
 
@@ -181,7 +184,7 @@ def main():
         for flag in output:
             print(flag, end="\n\n")
     else:
-        print("manly: No matching flags found.", file=sys.stderr)
+        print_err("manly: No matching flags found.")
 
 
 if __name__ == "__main__":
