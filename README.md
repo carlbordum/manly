@@ -4,8 +4,8 @@ manly is a compliment to man pages.
 It's a lot like [explainshell](https://explainshell.com)
 (don't worry, that is explain-shell, not explains-hell).
 
-Your good friend has a funky alias in [his dotfiles]
-(https://github.com/8Banana/dotfiles/blob/master/__Myst__/.zshrc):
+Your good friend has a funky alias in [his dotfiles](
+https://github.com/8Banana/dotfiles/blob/master/__Myst__/.zshrc):
 `alias alert="notify-send -i terminal -t 5 'Alert from Terminal!'"`:
 
 ```
