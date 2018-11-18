@@ -126,14 +126,11 @@ def manly(command):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
-        out, err = (s.decode('utf-8') for s in process.communicate())
+        out, err = (s.decode("utf-8") for s in process.communicate())
         # emulate subprocess.run of py3.5, for easier changing in the future
         if process.returncode:
             raise CalledProcessError(
-                process.returncode,
-                ["man", "--", program],
-                out,
-                err,
+                process.returncode, ["man", "--", program], out, err
             )
     except OSError as e:
         print("manly: Could not execute 'man'", file=sys.stderr)
@@ -173,7 +170,7 @@ def main():
     if not len(args.command):
         print(
             "manly: missing COMMAND\nTry 'manly --help' for more information.",
-            file=sys.stderr
+            file=sys.stderr,
         )
         sys.exit(0)
 
