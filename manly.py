@@ -138,7 +138,7 @@ def manly(command):
                 err,
             )
     except OSError as e:
-        print("Could not execute 'man'", file=sys.stderr)
+        print("manly: Could not execute 'man'", file=sys.stderr)
         print(e, file=sys.stderr)
         sys.exit(127)
     except CalledProcessError as e:
@@ -173,7 +173,10 @@ def main():
     args = parser.parse_args()
 
     if not len(args.command):
-        print("manly: missing COMMAND\n" "Try 'manly --help' for more information.")
+        print(
+            "manly: missing COMMAND\nTry 'manly --help' for more information.",
+            file=sys.stderr
+        )
         sys.exit(0)
 
     title, output = manly(args.command)
@@ -183,7 +186,7 @@ def main():
         for flag in output:
             print(flag, end="\n\n")
     else:
-        print("No flags found.")
+        print("manly: No matching flags found.", file=sys.stderr)
 
 
 if __name__ == "__main__":
