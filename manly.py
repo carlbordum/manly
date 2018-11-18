@@ -25,7 +25,10 @@ import subprocess
 import sys
 
 
-# A python3.5 backport to cover differences between 2/3.4 and 3.5
+# A backport from subprocess to cover differences between 2/3.4 and 3.5
+# This allows the same args to be passed into CPE regardless of version.
+# This can be replaced with an import at 2.7 EOL
+# See: https://github.com/carlbordum/manly/issues/27
 class CalledProcessError(subprocess.CalledProcessError):
     def __init__(self, returncode, cmd, output=None, stderr=None):
         self.returncode = returncode
@@ -131,7 +134,7 @@ def manly(command):
                 err,
             )
     except OSError as e:
-        print("Couldn't execute 'man'", file=sys.stderr)
+        print("Could not execute 'man'", file=sys.stderr)
         print(e, file=sys.stderr)
         sys.exit(127)
     except CalledProcessError as e:
