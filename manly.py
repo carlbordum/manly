@@ -65,8 +65,10 @@ VERSION = (
 def parse_flags(raw_flags):
     """Return a list of flags.
 
-    Concatenated flags will be split into
-    individual flags (eg. '-la' -> '-l', '-a').
+    Concatenated flags will be split into individual flags
+    (eg. '-la' -> '-l', '-a'), but the concatenated flag will also be
+    returned, as some command use single dash names (e.g `clang` has
+    flags like "-nostdinc") and some even mix both.
     """
     flags = []
     for flag in raw_flags:
@@ -144,9 +146,6 @@ def manly(command):
         sys.exit(e.returncode)
 
     manpage = out
-
-    # commands such as `clang` use single dash names like "-nostdinc"
-    uses_single_dash_names = bool(re.search(r"\n\n\s+-\w{2,}", manpage))
     flags = parse_flags(flags)
     output = parse_manpage(manpage, flags)
     title = _ANSI_BOLD % (
