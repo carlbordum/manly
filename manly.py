@@ -70,16 +70,16 @@ def parse_flags(raw_flags):
     returned, as some command use single dash names (e.g `clang` has
     flags like "-nostdinc") and some even mix both.
     """
-    flags = []
+    flags = set()
     for flag in raw_flags:
-        if flag.startswith("--"):
-            flags.append(flag)
-        elif flag.startswith("-"):
-            if len(flag) > 2:
-                flags.append(flag)
-            for char in flag[1:]:
-                flags.append("-" + char)
-    return flags
+        # Filter out non-flags
+        if not flag.startswith("-"):
+            continue
+        flags.add(flag)
+        # Split and sperately add potential single-letter flags
+        if not flag.startswith("--"):
+            flags.update("-" + char for char in flag[1:])
+    return list(flags)
 
 
 def parse_manpage(page, flags):
