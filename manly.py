@@ -50,17 +50,19 @@ VERSION = (
 ) % (__version__, __author__, __author__)
 
 
-def parse_flags(raw_flags, single_dash=False):
+def parse_flags(raw_flags):
     """Return a list of flags.
 
-    If *single_dash* is False, concatenated flags will be split into
+    Concatenated flags will be split into
     individual flags (eg. '-la' -> '-l', '-a').
     """
     flags = []
     for flag in raw_flags:
-        if flag.startswith("--") or single_dash:
+        if flag.startswith("--"):
             flags.append(flag)
         elif flag.startswith("-"):
+            if len(flag) > 2:
+                flags.append(flag)
             for char in flag[1:]:
                 flags.append("-" + char)
     return flags
@@ -127,7 +129,7 @@ def manly(command):
 
     # commands such as `clang` use single dash names like "-nostdinc"
     uses_single_dash_names = bool(re.search(r"\n\n\s+-\w{2,}", manpage))
-    flags = parse_flags(flags, single_dash=uses_single_dash_names)
+    flags = parse_flags(flags)
     output = parse_manpage(manpage, flags)
     title = _ANSI_BOLD % (
         re.search(r"(?<=^NAME\n\s{5}).+", manpage, re.MULTILINE).group(0).strip()
