@@ -25,9 +25,21 @@ import subprocess
 import sys
 
 
-_ANSI_BOLD = "\033[1m%s\033[0m"
-if not sys.stdout.isatty():
-    _ANSI_BOLD = "%s"
+# A backport from subprocess to cover differences between 2/3.4 and 3.5
+# This allows the same args to be passed into CPE regardless of version.
+# This can be replaced with an import at 2.7 EOL
+# See: https://github.com/carlbordum/manly/issues/27
+class CalledProcessError(subprocess.CalledProcessError):
+    def __init__(self, returncode, cmd, output=None, stderr=None):
+        self.returncode = returncode
+        self.cmd = cmd
+        self.output = output
+        self.stderr = stderr
+
+
+_ANSI_BOLD = "%s"
+if sys.stdout.isatty():
+    _ANSI_BOLD = "\033[1m%s\033[0m"
 
 USAGE_EXAMPLE = """example:
     $ manly rm --preserve-root -rf
@@ -107,25 +119,31 @@ def manly(command):
 
     # we set MANWIDTH, so we don't rely on the users terminal width
     # try `export MANWIDTH=80` -- makes manuals more readable imo :)
-    process = subprocess.Popen(
-        "export MANWIDTH=80; man %s" % program,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        shell=True,
-    )
-    out, err = process.communicate()
+    try:
+        process = subprocess.Popen(
+            ["man", "--", program],
+            env={"MANWIDTH": "80"},
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        out, err = (s.decode('utf-8') for s in process.communicate())
+        # emulate subprocess.run of py3.5, for easier changing in the future
+        if process.returncode:
+            raise CalledProcessError(
+                process.returncode,
+                ["man", "--", program],
+                out,
+                err,
+            )
+    except OSError as e:
+        print("Could not execute 'man'", file=sys.stderr)
+        print(e, file=sys.stderr)
+        sys.exit(127)
+    except CalledProcessError as e:
+        print(e.stderr.strip(), file=sys.stderr)
+        sys.exit(e.returncode)
 
-    if process.returncode == 0:
-        manpage = out.decode("utf-8")
-    else:
-        if process.returncode == 126:
-            error_msg = "Error: 'man' not executable."
-        elif process.returncode == 127:
-            error_msg = "Error: 'man' not found in your path. Please install it or add it to your path."
-        else:
-            error_msg = err.decode("utf-8")
-        print(error_msg, file=sys.stdout)
-        sys.exit(process.returncode)
+    manpage = out
 
     # commands such as `clang` use single dash names like "-nostdinc"
     uses_single_dash_names = bool(re.search(r"\n\n\s+-\w{2,}", manpage))
