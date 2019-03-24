@@ -107,7 +107,7 @@ def parse_manpage(page, flags):
 
         for flag in flags:
             for segment in segments:
-                if segment.startswith(flag):
+                if segment.startswith(flag) or segment.startswith("+|" + flag):
                     output.append(
                         re.sub(r"(^|\s)%s" % flag, _ANSI_BOLD % flag, section).rstrip()
                     )
