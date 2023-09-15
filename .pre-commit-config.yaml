@@ -1,0 +1,27 @@
+default_language_version:
+  node: system
+default_stages: [commit, push]
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-merge-conflict
+      - id: destroyed-symlinks
+      - id: detect-private-key
+      - id: mixed-line-ending
+  - repo: https://github.com/thlorenz/doctoc
+    rev: v2.2.0
+    hooks:
+      - id: doctoc
+        name: doctoc
+        args: [-u]
+  - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
+    rev: v9.5.0
+    hooks:
+      - id: commitlint
+        name: commitlint
+        stages: [commit-msg]
+        entry: bash -c 'commitlint --edit "$1" || (echo "Invalid commit message. Please use one of the following types:" && echo "  build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test" && false)' --
+        files: '\.git/COMMIT_EDITMSG$'
+        args: ["--config", "/home/keegan/.commitlintrc.js"]
+        additional_dependencies: ['@commitlint/config-conventional']
