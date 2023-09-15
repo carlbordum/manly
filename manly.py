@@ -24,7 +24,6 @@ import re
 import sys
 import string
 import subprocess
-from subprocess import CalledProcessError
 
 
 print_err = functools.partial(print, file=sys.stderr)
@@ -65,7 +64,7 @@ VERSION = (
 
 def remove_non_printable(text: str) -> str:
     printable_set = set(string.printable)
-    return ''.join(char for char in text if char in printable_set)
+    return "".join(char for char in text if char in printable_set)
 
 
 def make_bold(text: str) -> str:
@@ -220,6 +219,7 @@ def main():
 
     title, output = manly(args.command)
     print_output(title, output)
+
 
 if __name__ == "__main__":
     main()
