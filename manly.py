@@ -148,7 +148,7 @@ def manly(command):
     manpage = out
     flags = parse_flags(flags)
     output = parse_manpage(manpage, flags)
-    match = re.search(r"(?<=^NAME\\n\\s{7}).+", manpage, re.MULTILINE)
+    match = re.search(r"(?<=^NAME\n\s{7}).+", manpage, re.MULTILINE)
     title = f"{_ANSI_BOLD}{match.group(0).strip()}{_ANSI_RESET}"
     return title, output
 
