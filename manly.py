@@ -126,7 +126,7 @@ def manly(command):
     man_env["MANWIDTH"] = "80"
     try:
         process = subprocess.Popen(
-            ["man", "--", program],
+            ["man", "-P", "cat", program],
             env=man_env,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
