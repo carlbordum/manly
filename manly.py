@@ -39,10 +39,8 @@ class CalledProcessError(subprocess.CalledProcessError):
         self.output = output
         self.stderr = stderr
 
-
-_ANSI_BOLD = "%s"
-if sys.stdout.isatty():
-    _ANSI_BOLD = "\033[1m%s\033[0m"
+_ANSI_BOLD = "\033[1m"
+_ANSI_RESET = "\033[0m"
 
 USAGE_EXAMPLE = """example:
     $ manly rm --preserve-root -rf
@@ -148,17 +146,10 @@ def manly(command):
         sys.exit(e.returncode)
 
     manpage = out
-
-    print("=== Manpage content ===")
-    print(manpage)
-    print("========================")
-
     flags = parse_flags(flags)
     output = parse_manpage(manpage, flags)
-    title = _ANSI_BOLD % (
-        re.search(r"(?<=^NAME\n\s{7}).+", manpage, re.MULTILINE).group(0).strip()
-    )
-
+    match = re.search(r"(?<=^NAME\\n\\s{7}).+", manpage, re.MULTILINE)
+    title = f"{_ANSI_BOLD}{match.group(0).strip()}{_ANSI_RESET}"
     return title, output
 
 
