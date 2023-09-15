@@ -41,8 +41,6 @@ class CalledProcessError(subprocess.CalledProcessError):
         self.output = output
         self.stderr = stderr
 
-_ANSI_BOLD = "\033[1m"
-_ANSI_RESET = "\033[0m"
 
 USAGE_EXAMPLE = """example:
     $ manly rm --preserve-root -rf
@@ -65,6 +63,39 @@ VERSION = (
 ) % (__version__, __author__, __author__)
 
 
+def remove_non_printable(text: str) -> str:
+    printable_set = set(string.printable)
+    return ''.join(char for char in text if char in printable_set)
+
+
+def make_bold(text: str) -> str:
+    if sys.stdout.isatty():
+        return f"\033[1m{text}\033[0m"
+    return text
+
+
+def highlight_flags_in_section(flag: str, section: str) -> str:
+    return re.sub(rf"(^|\s){flag}", make_bold(flag), section).rstrip()
+
+
+def extract_title_from_manpage(manpage: str) -> str:
+    match = re.search(r"^NAME\s*\n\s*(.+?)\s*$", manpage, re.MULTILINE)
+    if match:
+        return make_bold(match.group(1).strip())
+    return "Title not found"
+
+
+def print_output(title: str, output: list) -> None:
+    if output:
+        print(f"\n{title}")
+        print("=" * (len(title) - 8), end="\n\n")
+
+        for flag in output:
+            print(f"{flag}\n")
+    else:
+        print(f"{make_bold('manly')}: No matching flags found.")
+
+
 def parse_flags(raw_flags):
     """Return a list of flags.
 
@@ -84,37 +115,6 @@ def parse_flags(raw_flags):
             flags.update("-" + char for char in flag[1:])
     return list(flags)
 
-
-# def parse_manpage(page, flags):
-#     """Return a list of blocks that match *flags* in *page*."""
-#     current_section = []
-#     output = []
-
-#     for line in page.splitlines():
-#         if line:
-#             current_section.append(line)
-#             continue
-
-#         section = "\n".join(current_section)
-#         section_top = section.strip().split("\n")[:2]
-#         # first_line = section_top[0].split(",")
-#         first_line = section_top[0].split("\n")
-
-#         segments = [seg.strip() for seg in first_line]
-#         try:
-#             segments.append(section_top[1].strip())
-#         except IndexError:
-#             pass
-
-#         for flag in flags:
-#             for segment in segments:
-#                 if segment.startswith(flag):
-#                     output.append(
-#                         re.sub(r"(^|\s)%s" % flag, flag, segment).rstrip()
-#                     )
-#                     break
-#         current_section = []
-#     return output
 
 def parse_manpage(page, flags):
     """Return a list of blocks that match *flags* in *page*."""
@@ -137,12 +137,12 @@ def parse_manpage(page, flags):
                     # Start a new section
                     inside_flag_section = flag
                     current_section.append(
-                        re.sub(r"(^|\s)%s" % flag, flag, stripped_line).rstrip()
+                        highlight_flags_in_section(flag, stripped_line)
                     )
                     break
             else:
                 if inside_flag_section is not None:
-                    # Add 5 spaces to the left of inside sections
+                    # Add spaces to the left of inside sections
                     indented_line = "       " + stripped_line
                     current_section.append(indented_line)
         else:
@@ -172,16 +172,14 @@ def manly(command):
             env=man_env,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            shell=True
+            shell=True,
         )
 
         out, err = (s.decode("utf-8") for s in process.communicate())
 
         # Check for errors
         if process.returncode:
-            raise CalledProcessError(
-                process.returncode, command, out, err
-            )
+            raise CalledProcessError(process.returncode, command, out, err)
     except OSError as e:
         print_err("manly: Could not execute 'man'")
         print_err(e)
@@ -190,14 +188,10 @@ def manly(command):
         print_err(e.stderr.strip())
         sys.exit(e.returncode)
 
-    # Define a set of printable characters
-    printable_set = set(string.printable)
-    # Remove non-printable characters from the output
-    manpage = ''.join(char for char in out if char in printable_set)
+    sanitized_manpage = remove_non_printable(out)
+    title = extract_title_from_manpage(sanitized_manpage)
     flags = parse_flags(flags)
-    output = parse_manpage(manpage, flags)
-    match = re.search(r'^NAME\s*\n\s*(.+?)\s*$', manpage, re.MULTILINE)
-    title = f"{_ANSI_BOLD}{match.group(1).strip()}{_ANSI_RESET}"
+    output = parse_manpage(sanitized_manpage, flags)
     return title, output
 
 
@@ -225,14 +219,7 @@ def main():
         sys.exit(1)
 
     title, output = manly(args.command)
-    if output:
-        print("\n%s" % title)
-        print("=" * (len(title) - 8), end="\n\n")
-        for flag in output:
-            print(flag, end="\n\n")
-    else:
-        print_err("manly: No matching flags found.")
-
+    print_output(title, output)
 
 if __name__ == "__main__":
     main()
