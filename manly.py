@@ -151,7 +151,7 @@ def manly(command):
     flags = parse_flags(flags)
     output = parse_manpage(manpage, flags)
     title = _ANSI_BOLD % (
-        re.search(r"(?<=^NAME\n\s{5}).+", manpage, re.MULTILINE).group(0).strip()
+        re.search(r"(?<=^NAME\n\s{7}).+", manpage, re.MULTILINE).group(0).strip()
     )
 
     return title, output
