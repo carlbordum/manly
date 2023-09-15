@@ -21,8 +21,10 @@ import argparse
 import functools
 import os
 import re
-import subprocess
 import sys
+import string
+import subprocess
+from subprocess import CalledProcessError
 
 
 print_err = functools.partial(print, file=sys.stderr)
@@ -77,40 +79,78 @@ def parse_flags(raw_flags):
         if not flag.startswith("-"):
             continue
         flags.add(flag)
-        # Split and sperately add potential single-letter flags
+        # Split and separately add potential single-letter flags
         if not flag.startswith("--"):
             flags.update("-" + char for char in flag[1:])
     return list(flags)
 
 
+# def parse_manpage(page, flags):
+#     """Return a list of blocks that match *flags* in *page*."""
+#     current_section = []
+#     output = []
+
+#     for line in page.splitlines():
+#         if line:
+#             current_section.append(line)
+#             continue
+
+#         section = "\n".join(current_section)
+#         section_top = section.strip().split("\n")[:2]
+#         # first_line = section_top[0].split(",")
+#         first_line = section_top[0].split("\n")
+
+#         segments = [seg.strip() for seg in first_line]
+#         try:
+#             segments.append(section_top[1].strip())
+#         except IndexError:
+#             pass
+
+#         for flag in flags:
+#             for segment in segments:
+#                 if segment.startswith(flag):
+#                     output.append(
+#                         re.sub(r"(^|\s)%s" % flag, flag, segment).rstrip()
+#                     )
+#                     break
+#         current_section = []
+#     return output
+
 def parse_manpage(page, flags):
     """Return a list of blocks that match *flags* in *page*."""
     current_section = []
     output = []
+    inside_flag_section = None
 
     for line in page.splitlines():
-        if line:
-            current_section.append(line)
-            continue
+        stripped_line = line.strip()
 
-        section = "\n".join(current_section)
-        section_top = section.strip().split("\n")[:2]
-        first_line = section_top[0].split(",")
+        if stripped_line:
+            # Check for any flag in this line
+            for flag in flags:
+                if stripped_line.startswith(flag):
+                    # Finish the previous section, if any
+                    if inside_flag_section is not None:
+                        output.append("\n".join(current_section).rstrip())
+                        current_section = []
 
-        segments = [seg.strip() for seg in first_line]
-        try:
-            segments.append(section_top[1].strip())
-        except IndexError:
-            pass
-
-        for flag in flags:
-            for segment in segments:
-                if segment.startswith(flag):
-                    output.append(
-                        re.sub(r"(^|\s)%s" % flag, _ANSI_BOLD % flag, section).rstrip()
+                    # Start a new section
+                    inside_flag_section = flag
+                    current_section.append(
+                        re.sub(r"(^|\s)%s" % flag, flag, stripped_line).rstrip()
                     )
                     break
-        current_section = []
+            else:
+                if inside_flag_section is not None:
+                    # Add 5 spaces to the left of inside sections
+                    indented_line = "       " + stripped_line
+                    current_section.append(indented_line)
+        else:
+            if inside_flag_section is not None:
+                output.append("\n".join(current_section).rstrip())
+                current_section = []
+                inside_flag_section = None
+
     return output
 
 
@@ -125,17 +165,22 @@ def manly(command):
     man_env.update(os.environ)
     man_env["MANWIDTH"] = "80"
     try:
+        command = f"man {program} | col -b"
+
         process = subprocess.Popen(
-            ["man", "-P", "cat", program],
+            command,
             env=man_env,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            shell=True
         )
+
         out, err = (s.decode("utf-8") for s in process.communicate())
-        # emulate subprocess.run of py3.5, for easier changing in the future
+
+        # Check for errors
         if process.returncode:
             raise CalledProcessError(
-                process.returncode, ["man", "--", program], out, err
+                process.returncode, command, out, err
             )
     except OSError as e:
         print_err("manly: Could not execute 'man'")
@@ -145,11 +190,14 @@ def manly(command):
         print_err(e.stderr.strip())
         sys.exit(e.returncode)
 
-    manpage = out
+    # Define a set of printable characters
+    printable_set = set(string.printable)
+    # Remove non-printable characters from the output
+    manpage = ''.join(char for char in out if char in printable_set)
     flags = parse_flags(flags)
     output = parse_manpage(manpage, flags)
-    match = re.search(r"(?<=^NAME\n\s{7}).+", manpage, re.MULTILINE)
-    title = f"{_ANSI_BOLD}{match.group(0).strip()}{_ANSI_RESET}"
+    match = re.search(r'^NAME\s*\n\s*(.+?)\s*$', manpage, re.MULTILINE)
+    title = f"{_ANSI_BOLD}{match.group(1).strip()}{_ANSI_RESET}"
     return title, output
 
 
