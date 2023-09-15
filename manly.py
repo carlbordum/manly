@@ -135,14 +135,13 @@ def parse_manpage(page, flags):
 
                     # Start a new section
                     inside_flag_section = flag
-                    current_section.append(
-                        highlight_flags_in_section(flag, stripped_line)
-                    )
+                    flag_line_with_spaces = " " * 4 + highlight_flags_in_section(flag, stripped_line)
+                    current_section.append(flag_line_with_spaces)
                     break
             else:
                 if inside_flag_section is not None:
-                    # Add spaces to the left of inside sections
-                    indented_line = "       " + stripped_line
+                    # Add 12 spaces to the left of inside sections
+                    indented_line = " " * 12 + stripped_line
                     current_section.append(indented_line)
         else:
             if inside_flag_section is not None:
