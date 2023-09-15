@@ -148,6 +148,11 @@ def manly(command):
         sys.exit(e.returncode)
 
     manpage = out
+
+    print("=== Manpage content ===")
+    print(manpage)
+    print("========================")
+
     flags = parse_flags(flags)
     output = parse_manpage(manpage, flags)
     title = _ANSI_BOLD % (
