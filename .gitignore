@@ -105,3 +105,6 @@ ENV/
 
 # Pycharm config
 .idea
+
+# Pre-commit
+.pre-commit-config.yaml
